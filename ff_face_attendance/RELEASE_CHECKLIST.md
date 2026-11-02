@@ -1,4 +1,4 @@
-# Odoo 19.0.0.2.5 release checklist
+# Odoo 19.0.0.2.6 release checklist
 
 ## Odoo Apps branch contents
 
@@ -11,7 +11,7 @@
 
 - Odoo 19 focused suite: 13/13 passed on disposable databases for 19.0.0.2.3.
 - Face service suite: 18 tests passed for 0.1.2. The 0.1.3 installer/pair endpoints remain unverified on Ubuntu.
-- Odoo accepted the 2.4 setup-wizard upgrade on the local disposable database. Version 2.5 changes packaging/docs, but the complete test suite was not rerun for 2.5.
+- Odoo accepted the 2.4 setup-wizard upgrade on the local disposable database. Version 2.5 separated the service package. Version 2.6 fixes the Apps description encoding and RTL code layout. The complete Odoo test suite was not rerun for 2.6.
 - Ubuntu package installation, service start, one-time pairing, real camera, performance, and legal/privacy review are NOT RUN/NOT ESTABLISHED.
 - Odoo Apps submission and acceptance are NOT DONE. This layout avoids automatic external executable installation from the module; final store review remains authoritative.
 

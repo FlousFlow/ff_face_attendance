@@ -50,7 +50,7 @@ This module provides technical controls; it does not determine a lawful basis, e
 
 ## Local verification evidence
 
-The 19.0.0.2.3 release passed 13 focused Odoo tests and 18 service tests. Odoo 19 accepted the 2.4 wizard upgrade locally. Version 2.5 separates the Odoo Apps addon from the service release; the service installer and pairing flow have not been run on Ubuntu, and the full test suite has not been rerun for 2.5. These checks do not establish production camera accuracy, workforce-scale performance, or Odoo Apps acceptance.
+The 19.0.0.2.3 release passed 13 focused Odoo tests and 18 service tests. Odoo 19 accepted the 2.4 wizard upgrade locally. Version 2.5 separated the Odoo Apps addon from the service release. Version 2.6 fixes the Odoo Apps description encoding and layout; the service installer and pairing flow have not been run on Ubuntu, and the complete test suite has not been rerun for 2.6. These checks do not establish production camera accuracy, workforce-scale performance, or Odoo Apps acceptance.
 
 
 ## دليل سريع بالعربية
