@@ -1,0 +1,22 @@
+<section class="oe_container">
+  <div class="oe_row oe_spaced">
+    <h2 class="oe_slogan">Face Attendance</h2>
+    <h3 class="oe_slogan">An opt-in, supervised attendance pilot for Odoo 19 Community</h3>
+    <p>This addon connects an HR-managed face kiosk to native Odoo attendance. Employees can also use the configured Odoo Badge/PIN kiosk.</p>
+    <p>Face enrollment and verification samples are sent to a separately deployed private AI service. The service stores encrypted enrollment crops; HR revocation requests deletion and Odoo retries until it is confirmed. Verification frames are processed in memory and not retained. Odoo stores attendance events, acknowledgment receipts, and verification metadata.</p>
+    <p>The face-point alignment guide is off by default. When an employee explicitly enables it, a resized camera still is sent to the private service about once per second for five YuNet alignment points; frames are processed in memory and not saved. Points guide face placement and do not improve identity matching.</p>
+    <p>The free YuNet/LBPH matcher and random directional head-turn prompt are experimental. They do not provide strong liveness or guaranteed photo/video spoof resistance. Use only in a supervised pilot and do not treat face results as sole payroll or disciplinary evidence.</p>
+    <p>Requires Odoo 19 Community with Human Resources and Attendances, plus separately configured private service infrastructure. Review biometric-data obligations and employee alternatives before deployment.</p>
+  </div>
+
+<section class="oe_container">
+  <div class="oe_row oe_spaced" dir="rtl" lang="ar">
+    <h2 class="oe_slogan">الحضور بالوجه</h2>
+    <h3 class="oe_slogan">تجربة حضور اختيارية وتحت الإشراف لأودو 19 Community</h3>
+    <p>يربط هذا التطبيق كشكًا تديره الموارد البشرية بنظام الحضور القياسي في أودو. ويظل كشك البطاقة أو الرقم السري متاحًا كطريقة بديلة.</p>
+    <p>تُرسل صور التسجيل والتحقق إلى خدمة وجه خاصة منفصلة. تُخزن صور التسجيل مشفرة، بينما تُعالج صور التحقق في الذاكرة ولا تُحفظ. تستطيع الموارد البشرية إلغاء التسجيل وطلب حذف الصور.</p>
+    <p>دليل نقاط الوجه اختياري ومتوقف افتراضيًا. عند تفعيله صراحة، تُرسل صورة مصغرة كل ثانية لاستخراج خمس نقاط محاذاة؛ تُعالج في الذاكرة ولا تُحفظ. النقاط تساعد على وضع الوجه ولا تحسن مطابقة الهوية.</p>
+    <p>مطابقة YuNet/LBPH المجانية وتعليمات تدوير الرأس العشوائية تجريبية ولا توفر حماية قوية من الصور أو الفيديو المزيف. استخدم النظام في تجربة خاضعة للإشراف فقط، ولا تعتمد على نتيجة الوجه وحدها للرواتب أو الإجراءات التأديبية.</p>
+    <p>يتطلب أودو 19 Community مع تطبيقَي الموارد البشرية والحضور، إضافة إلى بنية منفصلة لخدمة الوجه. راجع متطلبات البيانات الحيوية والخصوصية والبدائل المتاحة للموظفين قبل النشر.</p>
+  </div>
+</section>

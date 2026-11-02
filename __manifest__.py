@@ -1,0 +1,26 @@
+{
+    "name": "Face Attendance",
+    "version": "19.0.0.2.3",
+    "category": "Human Resources/Attendances",
+    "summary": "Opt-in face attendance pilot for Odoo 19 Community",
+    "description": "Adds an HR-managed, opt-in face attendance pilot to native Odoo attendance. Face enrollment and verification samples are sent to a separately deployed private AI service. An explicitly enabled alignment guide sends one resized camera frame per second for five YuNet points; frames are processed in memory and not saved. Enrollment crops are encrypted and deleted after HR revocation. Each attendance attempt receives a server-issued random left/right challenge checked against captured motion. The free LBPH/YuNet matcher remains experimental and does not provide robust anti-spoofing. Badge/PIN attendance remains the alternative.",
+    "author": "Flous Flow",
+    "website": "https://flousflow.com",
+    "license": "LGPL-3",
+    "images": ["static/description/screenshot-kiosk.png"],
+    "depends": ["hr", "hr_attendance"],
+    "data": [
+        "security/security.xml",
+        "security/ir.model.access.csv",
+        "views/kiosk_templates.xml",
+        "views/face_attendance_views.xml",
+        "data/face_attendance_cron.xml",
+    ],
+    "assets": {
+        "web.assets_backend": ["ff_face_attendance/static/src/device_credential_action.js"],
+        "web.assets_frontend": ["ff_face_attendance/static/src/kiosk.js", "ff_face_attendance/static/src/kiosk.scss"],
+    },
+    "installable": True,
+    "application": True,
+    "auto_install": False,
+}
