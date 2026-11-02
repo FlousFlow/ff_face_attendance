@@ -1,36 +1,33 @@
-# Companion face service setup
+# Private face-service setup
 
-The Face Attendance download now includes the companion `ff_face_ai_service` source and the verified YuNet detector under `deployment/`. The included installer supports self-hosted Ubuntu 22.04/24.04 when Odoo is installed directly on that same host. It creates a private non-root systemd service, binds it to loopback, generates distinct secrets and an encrypted-gallery key, verifies readiness, and prints a one-time pairing code.
+The Odoo Apps module is a standard Odoo addon. It does not install or launch another executable. The optional face service is distributed separately so server administrators explicitly install it on self-hosted infrastructure.
 
-## Guided same-server setup
+## One-command Ubuntu installation
 
-1. Install the Odoo addon and update the Apps list.
-2. On the same Ubuntu host, run `sudo bash /path/to/ff_face_attendance/deployment/install-local-face-service.sh`. The installer checks the OS and bundled YuNet SHA-256, installs the service dependencies, creates protected key/config files, generates local TLS, and starts `ff-face-ai.service`.
-3. In Odoo, open **Face Attendance → Connect Face Service** as an HR manager and enter the one-time code shown at the end of installation. Odoo verifies the local `/health/ready` endpoint and stores the generated service credentials.
-4. Enable the company face policy only after reviewing the pilot notice. The standard Badge/PIN kiosk remains available.
+Supported: Ubuntu 22.04/24.04, systemd, native Odoo on the same host, root/sudo access, and internet access for package installation. Run this command on the Odoo server. It downloads a pinned service release, verifies its SHA-256, installs the service, and prints a one-time code.
 
-The setup code is local-only, accepted once, and deleted from service storage after pairing. Service configuration, gallery encryption keys, and gallery data stay on the customer's server. The installer refuses to overwrite an existing environment so it cannot accidentally replace an active gallery key.
+```bash
+sudo bash -c 'set -eu; d=$(mktemp -d); trap '\''rm -rf "$d"'\'' EXIT; f="$d/face-service.tar.gz"; curl -fsSL "https://github.com/FlousFlow/ff_face_attendance/releases/download/face-service-0.1.3/ff_face_ai_service-0.1.3.tar.gz" -o "$f"; printf "%s  %s\n" "91a6fc42f4f46f8d7f265496019b161871cccd345a960692f0e86ab1f84200b8" "$f" | sha256sum -c -; tar -xzf "$f" -C "$d"; bash "$d/ff_face_ai_service-0.1.3/deployment/install-local-face-service.sh"'
+```
 
-## Support boundary
+The command installs `ff-face-ai.service` as a non-root system service bound to `127.0.0.1:8787`; it generates TLS and service/gallery secrets, and does not overwrite an existing gallery key. Keep the printed pairing code private.
 
-The guided installer targets Ubuntu 22.04/24.04, systemd, and a native Odoo process on the same host. It does not support Odoo Online, Odoo.sh, containers, or other Linux distributions. For those environments, deploy the service separately on a private network with HTTPS, then configure the protected Odoo parameters described below.
+Then in Odoo open **Face Attendance → Connect Face Service** as an HR manager, paste the code, and wait for the health check. The face-attendance company policy remains disabled until HR enables it.
 
-## Manual service configuration
+The service package and release source are available at [face-service-0.1.3](https://github.com/FlousFlow/ff_face_attendance/releases/tag/face-service-0.1.3). The face gallery and generated secrets remain on the customer's server. Port 8787 must not be exposed publicly.
 
-Configure protected Odoo system parameters through an authorized administrative path:
+## Other hosting
 
-- `ff_face_attendance.service_url`: private HTTPS base URL.
-- `ff_face_attendance.service_request_secret`: exact value of `FF_ODOO_SHARED_SECRET`.
-- `ff_face_attendance.service_hmac_secret`: exact value of `FF_RESULT_HMAC_SECRET`.
-- `ff_face_attendance.pilot_admin_token`: exact value of `FF_PILOT_ADMIN_TOKEN`.
-- `ff_face_attendance.service_ready`: readiness attestation set only after authenticated health, enrollment, verification, and deletion checks.
+Odoo Online, Odoo.sh, containers, and other Linux distributions require a separately managed private service and a deployment profile compatible with that platform. The setup wizard in this addon pairs only with a service on the same host (`https://127.0.0.1:8787`).
 
-The systemd service binds to `127.0.0.1:8787`; do not expose this port publicly. Keep service secrets and encryption keys out of source control and logs.
+## Manual/private-network configuration
 
-## Back up and rotate
+For a different private service URL, authorized administrators must configure protected Odoo system parameters:
 
-Enrollment crops are held in encrypted `gallery.enc`. Attendance verification frames and explicitly enabled face-alignment guide frames are processed in memory and are not persisted. Back up the gallery and encryption key separately in approved encrypted storage. For key rotation, configure `NEW_KEY,OLD_KEY`, restart once so the gallery is re-encrypted with the new primary key, restart with only `NEW_KEY`, then verify readiness. Do not remove the old key before migration succeeds. HR revocation requests deletion and Odoo retries until the service confirms it; keep the key available until deletion/rotation work is complete.
+- `ff_face_attendance.service_url`
+- `ff_face_attendance.service_request_secret`
+- `ff_face_attendance.service_hmac_secret`
+- `ff_face_attendance.pilot_admin_token`
+- `ff_face_attendance.service_ready` (only after readiness and authenticated verification/deletion checks)
 
-## Pilot limits
-
-The service uses YuNet detection, OpenCV LBPH matching, and a basic head-turn prompt. It does not provide robust anti-spoofing or guaranteed liveness. Do not use it as sole evidence for unattended payroll or disciplinary decisions. Complete privacy/legal review, camera testing, and a representative performance validation before broad rollout.
+Back up the encrypted gallery and key separately. Attendance and optional landmark frames are processed in memory, not stored. HR revocation blocks matching and queues deletion. This supervised LBPH pilot is not robust anti-spoofing or guaranteed liveness; complete camera, privacy, and performance review before rollout.
