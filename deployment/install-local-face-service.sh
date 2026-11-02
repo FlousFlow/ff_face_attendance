@@ -46,7 +46,10 @@ install -o "$SERVICE_USER" -g "$SERVICE_USER" -m 0640 "$MODEL_SOURCE" "$APP_DIR/
 python3 -m venv "$APP_DIR/.venv"
 "$APP_DIR/.venv/bin/pip" install --upgrade pip
 "$APP_DIR/.venv/bin/pip" install "$APP_DIR[pilot]"
-chown -R "$SERVICE_USER:$SERVICE_USER" "$APP_DIR" "$DATA_DIR"
+chown -R root:root "$APP_DIR"
+find "$APP_DIR" -type d -exec chmod 0755 {} +
+find "$APP_DIR" -type f -exec chmod a+r,go-w {} +
+chown -R "$SERVICE_USER:$SERVICE_USER" "$DATA_DIR"
 
 openssl req -x509 -nodes -days 1825 -newkey rsa:3072 \
     -keyout "$ETC_DIR/server.key" -out "$ETC_DIR/server.crt" \

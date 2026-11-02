@@ -7,7 +7,7 @@ Adds an opt-in, supervised face-attendance pilot around native `hr.attendance`, 
 - Opening the camera shows a browser-local preview. The addon does not upload a frame during preview by default.
 - The optional face-point guide requires an explicit checkbox and button click. While enabled, it sends at most one resized still frame per second to the configured private face service, which returns YuNet's five alignment points. Frames are processed in memory, are not stored, and sending stops when the guide is turned off. The guide is for alignment only; it does not identify the employee.
 - When an employee explicitly starts enrollment or Check in/Check out, the kiosk captures only the prompted 3–5 frames and sends them to the private face service on the same server over local TLS (or to a separately deployed private service).
-- Enrollment face crops are stored by that service in an encrypted gallery. The encryption key is supplied by the operator and must be backed up and rotated using the service instructions.
+- Enrollment face crops are stored by that service in an encrypted gallery. The included installer generates the encryption key locally; back it up and rotate it using the service instructions.
 - Attendance verification frames are decoded and processed in memory; the service does not write them to disk. Odoo stores attendance events and verification metadata, not those frames.
 - Odoo records the acknowledgment version, employee, HR operator, and timestamp. HR revocation blocks matching immediately, requests deletion at the service, and retries every five minutes until confirmed.
 - Audit receipts are immutable and retained in Odoo. Define a retention policy for those receipts and attendance/audit records before deployment.
@@ -46,7 +46,7 @@ See [`deployment/README_AR.md`](deployment/README_AR.md) for the guided same-ser
 
 ## Privacy and release gates
 
-This module provides technical controls; it does not determine a lawful basis, establish valid employee consent, or provide legal compliance. Biometric-data processing in employment requires a privacy/legal review for the deployment jurisdiction, purpose, notice, access, retention, deletion, and employee alternatives before rollout. The app listing must disclose that camera samples are sent to a separately operated private service.
+This module provides technical controls; it does not determine a lawful basis, establish valid employee consent, or provide legal compliance. Biometric-data processing in employment requires a privacy/legal review for the deployment jurisdiction, purpose, notice, access, retention, deletion, and employee alternatives before rollout. The app listing must disclose that camera samples are sent to a private service running on the customer-managed server.
 
 ## Local verification evidence
 
