@@ -1,31 +1,30 @@
-# Release candidate checklist — 19.0.0.2.3
+# Release candidate checklist — 19.0.0.2.4
 
-## Verified
+## Included
 
-- Fresh Odoo 19 Community install and module upgrade passed on disposable databases.
-- Focused Odoo suite: 13 post-install tests passed after the 19.0.0.2.3 changes.
-- Arabic and English kiosk modes rendered in the browser; Arabic RTL and dynamic status localization were verified. Arabic must be activated in the target database for the Arabic choice to work.
-- Face service suite: 18 tests passed, including directional challenge checks, normalized five-point output, and rejection of unsigned landmark-frame requests.
-- Python compilation/AST, JavaScript syntax, XML parsing, manifest metadata, translation catalog, and model-manifest checks passed.
-- HR can open an employee directly into the enrollment kiosk. Production enrollment requires an HR manager, same-origin request, and versioned employee acknowledgment. Re-enrollment reuses the same service template.
-- Each attendance attempt receives a cryptographically random, server-issued left/right challenge persisted in its one-use session. Odoo rejects a client direction that does not match the session, and the face service checks signed movement direction.
-- Camera preview stays local by default. The explicitly enabled alignment guide can send one resized frame (max 640px wide) per second to the private service; frames are processed in memory and not stored. Attendance sends up to five transient frames.
-- The alignment overlay draws YuNet's five eye/nose/mouth-corner landmarks for capture guidance, not identity matching.
-- Landmark snapshots require the opt-in, a paired kiosk, same-origin request, rate limits, and signed service requests.
-- Revocation immediately blocks matching and retries authenticated service deletion until confirmed.
-- Odoo Apps metadata, screenshot, 512×512 icon, Arabic catalog, Arabic user guide, English setup/security documentation, and privacy disclosures are included.
+- Core Odoo 19 addon and its standard manifest dependencies (`hr`, `hr_attendance`).
+- Companion face API source, its Python dependency manifest, tests, systemd unit, and the YuNet detector with a recorded SHA-256 and MIT notice. These deployment files are inside the addon download under `deployment/`; they are not Odoo modules.
+- Ubuntu 22.04/24.04 same-host installer creates a non-root loopback service, distinct keys, local TLS, and a one-time setup code. An HR-manager Odoo wizard pairs the local service and verifies readiness.
+- HR can enroll/revoke faces, audit acknowledgment, and use randomized directional prompts. Arabic and English kiosk copy, icon, screenshot, setup documentation, and privacy disclosures are included.
 
-## Not established
+## Previously verified before the 2.4 setup changes
 
-- A real camera enrollment/check-in/check-out or landmark-overlay trial requires a human and the target camera/browser and has not been completed for this release.
-- Direction calibration against mirrored/unmirrored target-camera frames remains to be confirmed.
-- No representative host, employee population, or concurrent-kiosk performance benchmark has been run.
-- YuNet/LBPH and the randomized head-turn challenge remain a supervised pilot; they do not provide strong anti-spoofing and must not be the sole basis for unattended payroll or disciplinary decisions.
-- Jurisdiction-specific privacy/legal approval, lawful-basis review, employee notice, and retention policy are deployment responsibilities and have not been established by software tests.
-- The source is maintained in `FlousFlow/ff_face_attendance`, branch `19.0`. It has not been submitted to or accepted by Odoo Apps.
+- Odoo 19 focused suite: 13/13 passed on disposable databases for version 19.0.0.2.3.
+- Companion face service suite: 18 tests passed for version 0.1.2 (the 0.1.3 local pairing endpoints are not yet verified).
+- Arabic/English kiosk rendering, RTL, and dynamic status localization were verified in the local Odoo browser.
 
-## Deployment notes
+## Not yet verified for 2.4
 
-Create deployment secrets and keys on the target host. Never commit service credentials, encryption keys, employee captures, or gallery data. Keep the optional face service private and configure it only after following `FACE_SERVICE_SETUP.md`. New installations keep biometric policies disabled until an authorized operator configures the service and enables the supervised pilot.
+- Odoo accepted the 2.4 module upgrade on the local disposable database. Translation occurrence syntax and explicit wizard model naming were corrected after inspecting that upgrade log. The full Odoo test suite has not been rerun for 2.4.
+- The local Linux installer has not been executed on Ubuntu 22.04/24.04. Its systemd, certificate, dependency installation, one-time pairing, and key-preservation behavior still require a disposable Linux host run.
+- The upgraded service pairing endpoints and 0.1.3 service suite have not been exercised.
+- Real-person camera enrollment/check-in/check-out, landmark overlay, direction calibration, representative load, and host performance remain NOT RUN.
+- YuNet/LBPH with a randomized head-turn remains a supervised pilot, not strong anti-spoofing/PAD. Do not rely on it alone for payroll or disciplinary decisions.
+- Jurisdiction-specific privacy/legal approval, lawful basis, employee notice, and retention policy are deployment responsibilities, not established by software tests.
+- Source is in public repository `FlousFlow/ff_face_attendance`, Odoo branch `19.0`. This version has not been submitted to or accepted by Odoo Apps.
 
-Arabic localization uses Odoo's JavaScript translation helper and the module's `i18n/ar.po` catalog.
+## Installer support boundary
+
+The bundled installer supports native Odoo on the same Ubuntu 22.04/24.04 systemd host. It does not support Odoo Online, Odoo.sh, containers, or other Linux distributions. Those deployments must host the service separately on a private network and configure the protected Odoo system parameters manually.
+
+The installer refuses to overwrite an existing service environment, so rerunning it cannot replace the gallery encryption key. Keep backups of the database, filestore, encrypted gallery, and gallery key. Never commit credentials, employee captures, or gallery data.

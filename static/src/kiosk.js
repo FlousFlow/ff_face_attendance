@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const gain = audioContext.createGain();
             oscillator.frequency.value = frequency;
             gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.75, audioContext.currentTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.95, audioContext.currentTime + 0.02);
             gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
             oscillator.connect(gain);
             gain.connect(audioContext.destination);

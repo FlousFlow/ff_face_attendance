@@ -1,7 +1,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Face Attendance 19.0.0.2.3\n"
+"Project-Id-Version: Face Attendance 19.0.0.2.4\n"
 "PO-Revision-Date: 2026-11-02 10:15+0000\n"
 "Last-Translator: Flous Flow\n"
 "Language-Team: Arabic\n"
@@ -892,4 +892,79 @@ msgstr ""
 #. module: ff_face_attendance
 #: code:addons/ff_face_attendance/models/hr_employee.py:0
 msgid "Only an HR manager can revoke biometric enrollment."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Connect Face Service"
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "One-time setup code"
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Paste the one-time setup code"
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Connect service"
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Run the included server installer on the same Ubuntu server as Odoo. It installs the private face service and shows one setup code. Paste that code here; Odoo stores the connection securely and checks service readiness."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The service stays on this server. Face attendance remains disabled until an HR manager enables a company policy. Keep Badge/PIN attendance available."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Only an HR manager can connect the face service."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The setup code is invalid. Run the server installer again to generate a new code."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The local face service rejected the setup code. Check that the server installer completed and the code is current."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The local face service returned an invalid setup response."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The face service is installed but not ready. Check its model and storage, then reconnect."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Odoo could not finish pairing with the local face service. Retry with the same setup code."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Odoo could not reach the face service on this server. Confirm the installer is running on the same Linux server, then retry."
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Face service connected"
+msgstr ""
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The local service is ready. Face attendance remains off until an HR manager enables the company policy."
 msgstr ""

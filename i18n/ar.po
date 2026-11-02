@@ -1,7 +1,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Face Attendance 19.0.0.2.3\n"
+"Project-Id-Version: Face Attendance 19.0.0.2.4\n"
 "PO-Revision-Date: 2026-11-02 10:15+0000\n"
 "Last-Translator: Flous Flow\n"
 "Language-Team: Arabic\n"
@@ -933,3 +933,78 @@ msgstr "سجل إقرارات الوجه"
 #: code:addons/ff_face_attendance/models/hr_employee.py:0
 msgid "Only an HR manager can revoke biometric enrollment."
 msgstr "لا يمكن إلا لمدير الموارد البشرية إلغاء تسجيل الوجه."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Connect Face Service"
+msgstr "ربط خدمة الوجه"
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "One-time setup code"
+msgstr "رمز الإعداد لمرة واحدة"
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Paste the one-time setup code"
+msgstr "أدخل رمز الإعداد لمرة واحدة"
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Connect service"
+msgstr "ربط الخدمة"
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Run the included server installer on the same Ubuntu server as Odoo. It installs the private face service and shows one setup code. Paste that code here; Odoo stores the connection securely and checks service readiness."
+msgstr "شغّل أداة التثبيت المرفقة على خادم أوبونتو نفسه الذي يعمل عليه أودو. ستثبت خدمة الوجه الخاصة وتعرض رمز إعداد واحدًا. أدخل الرمز هنا ليربط أودو بالخدمة ويتحقق من جاهزيتها."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The service stays on this server. Face attendance remains disabled until an HR manager enables a company policy. Keep Badge/PIN attendance available."
+msgstr "تظل الخدمة على هذا الخادم. يبقى الحضور بالوجه متوقفًا حتى يفعّل مسؤول الموارد البشرية سياسة الشركة. أبقِ الحضور بالبطاقة أو الرقم السري متاحًا."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Only an HR manager can connect the face service."
+msgstr "لا يمكن إلا لمدير الموارد البشرية ربط خدمة الوجه."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The setup code is invalid. Run the server installer again to generate a new code."
+msgstr "رمز الإعداد غير صالح. شغّل أداة التثبيت على الخادم للحصول على رمز جديد."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The local face service rejected the setup code. Check that the server installer completed and the code is current."
+msgstr "رفضت خدمة الوجه المحلية رمز الإعداد. تحقق من اكتمال التثبيت واستخدم الرمز الحالي."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The local face service returned an invalid setup response."
+msgstr "أعادت خدمة الوجه المحلية بيانات إعداد غير صالحة."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The face service is installed but not ready. Check its model and storage, then reconnect."
+msgstr "خدمة الوجه مثبتة لكنها غير جاهزة. تحقق من النموذج والتخزين ثم أعد الربط."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Odoo could not finish pairing with the local face service. Retry with the same setup code."
+msgstr "تعذر على أودو إكمال الربط بخدمة الوجه المحلية. أعد المحاولة بالرمز نفسه."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Odoo could not reach the face service on this server. Confirm the installer is running on the same Linux server, then retry."
+msgstr "تعذر على أودو الوصول إلى خدمة الوجه على هذا الخادم. تأكد من تشغيل المثبت على خادم Linux نفسه ثم أعد المحاولة."
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "Face service connected"
+msgstr "تم ربط خدمة الوجه"
+
+#. module: ff_face_attendance
+#: code:addons/ff_face_attendance/wizards/face_service_setup.py:0
+msgid "The local service is ready. Face attendance remains off until an HR manager enables the company policy."
+msgstr "الخدمة المحلية جاهزة. يظل الحضور بالوجه متوقفًا حتى يفعّل مسؤول الموارد البشرية سياسة الشركة."

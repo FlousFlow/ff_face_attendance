@@ -1,4 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_face_service_setup_wizard_manager,face.service.setup.wizard manager,model_face_service_setup_wizard,hr.group_hr_manager,1,1,1,1
 access_ff_face_device_hr,ff.face.device hr,model_ff_face_device,hr.group_hr_manager,1,1,1,0
 access_ff_face_policy_hr,ff.face.policy hr,model_ff_face_policy,hr.group_hr_manager,1,1,1,0
 access_ff_face_exception_hr,ff.face.exception hr,model_ff_face_exception,hr.group_hr_user,1,1,1,0

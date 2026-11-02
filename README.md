@@ -6,7 +6,7 @@ Adds an opt-in, supervised face-attendance pilot around native `hr.attendance`, 
 
 - Opening the camera shows a browser-local preview. The addon does not upload a frame during preview by default.
 - The optional face-point guide requires an explicit checkbox and button click. While enabled, it sends at most one resized still frame per second to the configured private face service, which returns YuNet's five alignment points. Frames are processed in memory, are not stored, and sending stops when the guide is turned off. The guide is for alignment only; it does not identify the employee.
-- When an employee explicitly starts enrollment or Check in/Check out, the kiosk captures only the prompted 3–5 frames and sends them to the separately deployed private face service over HTTPS.
+- When an employee explicitly starts enrollment or Check in/Check out, the kiosk captures only the prompted 3–5 frames and sends them to the private face service on the same server over local TLS (or to a separately deployed private service).
 - Enrollment face crops are stored by that service in an encrypted gallery. The encryption key is supplied by the operator and must be backed up and rotated using the service instructions.
 - Attendance verification frames are decoded and processed in memory; the service does not write them to disk. Odoo stores attendance events and verification metadata, not those frames.
 - Odoo records the acknowledgment version, employee, HR operator, and timestamp. HR revocation blocks matching immediately, requests deletion at the service, and retries every five minutes until confirmed.
@@ -23,22 +23,16 @@ The optional free service uses YuNet face detection, OpenCV LBPH matching, and a
 1. Back up the database and filestore.
 2. Add this module directory to `addons_path` and update the Apps list.
 3. Install **Face Attendance** in a test database first; test enrollment, attendance check-in/out, revocation, and the native attendance alternative.
-4. Configure the private face service and protected Odoo system parameters below. Keep the service private and require HTTPS.
-5. Create a company policy and kiosk device as an HR manager. Rotate the one-time kiosk credential, open `/ff_face_attendance/kiosk` over HTTPS on the kiosk, and pair it once.
+4. On self-hosted Ubuntu 22.04/24.04 with Odoo installed directly on the same server, the server administrator runs `sudo bash /path/to/ff_face_attendance/deployment/install-local-face-service.sh` once. The installer verifies the bundled model, creates secrets, and starts a loopback-only service.
+5. In Odoo, an HR manager opens **Face Attendance → Connect Face Service**, pastes the one-time code printed by the installer, and waits for the readiness check. Then create a company policy and kiosk device, enable the supervised pilot, and pair the kiosk.
+
+The included installer does not support Odoo Online, Odoo.sh, containers, or non-Ubuntu hosts. Those environments need a separately deployed private service following `FACE_SERVICE_SETUP.md`.
 
 This addon has no Enterprise dependency and does not require PayrollFlow.
 
-## Service configuration
+## Service setup
 
-Configure protected Odoo system parameters:
-
-- `ff_face_attendance.service_url`: private HTTPS base URL.
-- `ff_face_attendance.service_request_secret`: same value as `FF_ODOO_SHARED_SECRET`.
-- `ff_face_attendance.service_hmac_secret`: same value as `FF_RESULT_HMAC_SECRET`.
-- `ff_face_attendance.pilot_admin_token`: same value as `FF_PILOT_ADMIN_TOKEN`.
-- `ff_face_attendance.service_ready`: operator-maintained readiness attestation.
-
-For local TLS development only, `ff_face_attendance.allow_insecure_local_service=true` accepts the local self-signed test certificate. Never enable it for a deployed service.
+The setup wizard writes the protected service URL and generated HMAC/admin credentials into Odoo after the one-time local pairing code is entered. It checks `/health/ready`; it does not enable the company policy automatically. Keep the local service bound to loopback. For remote/private-network deployments, follow `FACE_SERVICE_SETUP.md` and require verified TLS.
 
 ## HR enrollment and revocation
 
@@ -48,7 +42,7 @@ From the employee's **Face Attendance** tab, HR can inspect the enrollment state
 
 ## Optional service setup
 
-See [`FACE_SERVICE_SETUP.md`](FACE_SERVICE_SETUP.md) for companion-service installation, model artifact verification, encrypted gallery provisioning, backup, and key rotation. The service is disabled by default. If enabling the free pilot, use only for a supervised evaluation and preserve the Badge/PIN alternative.
+See [`deployment/README_AR.md`](deployment/README_AR.md) for the guided same-server installer, or [`FACE_SERVICE_SETUP.md`](FACE_SERVICE_SETUP.md) for manual/private-network setup, model verification, encrypted gallery backup, and key rotation. The service is disabled until an authorized HR manager completes the setup and enables the company policy.
 
 ## Privacy and release gates
 
@@ -56,7 +50,7 @@ This module provides technical controls; it does not determine a lawful basis, e
 
 ## Local verification evidence
 
-The module was upgraded and its focused Odoo 19 suite passed on a disposable test database. The companion service tests also pass. These checks do not validate the customer deployment, production camera hardware, face-match accuracy across a workforce, load, or official Odoo Apps acceptance.
+The preceding 19.0.0.2.3 release passed 13 focused Odoo tests and 18 service tests. The local installer and one-time pairing wizard introduced in 19.0.0.2.4 have not yet been exercised on a customer Ubuntu host. These checks do not validate production camera hardware, face-match accuracy across a workforce, load, or official Odoo Apps acceptance.
 
 
 ## دليل سريع بالعربية

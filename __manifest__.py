@@ -1,9 +1,9 @@
 {
     "name": "Face Attendance",
-    "version": "19.0.0.2.3",
+    "version": "19.0.0.2.4",
     "category": "Human Resources/Attendances",
-    "summary": "Opt-in face attendance pilot for Odoo 19 Community",
-    "description": "Adds an HR-managed, opt-in face attendance pilot to native Odoo attendance. Face enrollment and verification samples are sent to a separately deployed private AI service. An explicitly enabled alignment guide sends one resized camera frame per second for five YuNet points; frames are processed in memory and not saved. Enrollment crops are encrypted and deleted after HR revocation. Each attendance attempt receives a server-issued random left/right challenge checked against captured motion. The free LBPH/YuNet matcher remains experimental and does not provide robust anti-spoofing. Badge/PIN attendance remains the alternative.",
+    "summary": "Odoo 19 face attendance with guided local service installer",
+    "description": "Adds an HR-managed, opt-in face-attendance pilot to native Odoo attendance. The addon download includes a guided Ubuntu installer for a private same-server face service and a one-code Odoo setup wizard. Face enrollment and verification samples stay on the customer's host. An explicitly enabled alignment guide sends one resized frame per second to the local service for five YuNet points; frames are processed in memory and not saved. Enrollment crops are encrypted and deleted after HR revocation. The free LBPH/YuNet matcher remains experimental and does not provide robust anti-spoofing. Badge/PIN remains the alternative.",
     "author": "Flous Flow",
     "website": "https://flousflow.com",
     "license": "LGPL-3",
@@ -14,6 +14,7 @@
         "security/ir.model.access.csv",
         "views/kiosk_templates.xml",
         "views/face_attendance_views.xml",
+        "wizards/face_service_setup_views.xml",
         "data/face_attendance_cron.xml",
     ],
     "assets": {
