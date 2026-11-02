@@ -4,17 +4,21 @@
         <field name="model">face.service.setup.wizard</field>
         <field name="arch" type="xml">
             <form string="Connect Face Service">
-                <div class="alert alert-info" role="alert">
+                <field name="service_connected" invisible="True"/>
+                <div class="alert alert-success" role="alert" invisible="not service_connected">
+                    The face service is already connected and ready at <field name="service_url" readonly="True" class="oe_inline"/>. Face attendance remains disabled until an HR manager enables a company policy.
+                </div>
+                <div class="alert alert-info" role="alert" invisible="service_connected">
                     Run the included server installer on the same Ubuntu server as Odoo. It installs the private face service and shows one setup code. Paste that code here; Odoo stores the connection securely and checks service readiness.
                 </div>
                 <div class="alert alert-warning" role="alert">
                     The service stays on this server. Face attendance remains disabled until an HR manager enables a company policy. Keep Badge/PIN attendance available.
                 </div>
                 <group>
-                    <field name="pairing_code" password="True" placeholder="Paste the one-time setup code"/>
+                    <field name="pairing_code" password="True" placeholder="Paste the one-time setup code" invisible="service_connected"/>
                 </group>
                 <footer>
-                    <button name="action_connect" type="object" string="Connect service" class="btn-primary"/>
+                    <button name="action_connect" type="object" string="Connect service" class="btn-primary" invisible="service_connected"/>
                     <button string="Cancel" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>

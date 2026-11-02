@@ -1,6 +1,6 @@
 import requests
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
 
@@ -8,12 +8,31 @@ class FaceServiceSetupWizard(models.TransientModel):
     _name = "face.service.setup.wizard"
     _description = "Face Service Setup Wizard"
 
-    pairing_code = fields.Char(required=True, string="One-time setup code")
+    pairing_code = fields.Char(string="One-time setup code")
+    service_connected = fields.Boolean(
+        compute="_compute_service_status",
+        string="Service connected",
+    )
+    service_url = fields.Char(compute="_compute_service_status", string="Service URL")
+
+    @api.depends()
+    def _compute_service_status(self):
+        params = self.env["ir.config_parameter"].sudo()
+        service_url = params.get_param("ff_face_attendance.service_url") or ""
+        service_ready = params.get_param("ff_face_attendance.service_ready") == "true"
+        request_secret = params.get_param("ff_face_attendance.service_request_secret")
+        hmac_secret = params.get_param("ff_face_attendance.service_hmac_secret")
+        connected = bool(service_url and service_ready and request_secret and hmac_secret)
+        for wizard in self:
+            wizard.service_connected = connected
+            wizard.service_url = service_url
 
     def action_connect(self):
         self.ensure_one()
         if not self.env.user.has_group("hr.group_hr_manager"):
             raise AccessError(_("Only an HR manager can connect the face service."))
+        if self.service_connected:
+            raise UserError(_("The face service is already connected and ready."))
         code = (self.pairing_code or "").strip()
         if len(code) < 24 or len(code) > 128:
             raise UserError(_("The setup code is invalid. Run the server installer again to generate a new code."))
