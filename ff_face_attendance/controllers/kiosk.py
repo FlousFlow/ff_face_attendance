@@ -119,6 +119,7 @@ class FaceKioskController(http.Controller):
     @http.route("/ff_face_attendance/enroll", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def enrollment_page(self, **kwargs):
         """Open the dedicated face-enrollment page from the native Odoo kiosk."""
+        admin_mode = kwargs.get("admin_mode") == "1"
         requested_language = kwargs.get("lang")
         language_aliases = {"ar": "ar_001", "ar_001": "ar_001", "en": "en_US", "en_US": "en_US"}
         language_code = language_aliases.get(requested_language)
@@ -130,7 +131,9 @@ class FaceKioskController(http.Controller):
         device = self._device()
         company = kiosk_company or (device.company_id if device else request.env.company)
         requested_employee_id = False
-        if request.env.user.has_group("hr.group_hr_manager"):
+        if admin_mode and not request.env.user.has_group("hr.group_hr_manager"):
+            return request.not_found()
+        if request.env.user.has_group("hr.group_hr_manager") or admin_mode:
             try:
                 candidate_id = int(kwargs.get("employee_id") or 0)
             except (TypeError, ValueError):
@@ -141,7 +144,9 @@ class FaceKioskController(http.Controller):
                 requested_employee_id = candidate_id
         response = request.render("ff_face_attendance.public_face_kiosk", {
             "local_demo": self._is_local_demo(),
-            "enrollment_only": bool(request.env.user.has_group("hr.group_hr_manager") and not device and not kiosk_company),
+            "enrollment_only": bool(admin_mode or (request.env.user.has_group("hr.group_hr_manager") and not device and not kiosk_company)),
+            "admin_mode": admin_mode,
+            "enrollment_path": "/ff_face_attendance/admin/enroll" if admin_mode else "/ff_face_attendance/enroll",
             "requested_employee_id": requested_employee_id,
             "kiosk_language": request.env.lang,
         })
@@ -159,6 +164,12 @@ class FaceKioskController(http.Controller):
                 path="/", secure=request.httprequest.is_secure, httponly=False, samesite="Lax",
             )
         return response
+
+    @http.route("/ff_face_attendance/admin/enroll", type="http", auth="user", methods=["GET"], csrf=False, sitemap=False)
+    def admin_enrollment_page(self, **kwargs):
+        """HR-only enrollment page; it never exposes device provisioning controls."""
+        kwargs["admin_mode"] = "1"
+        return self.enrollment_page(**kwargs)
 
     @http.route("/ff_face_attendance/device/status", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def kiosk_device_status(self, **kwargs):

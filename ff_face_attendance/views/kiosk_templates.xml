@@ -14,13 +14,13 @@
                     <section class="card shadow-sm mx-auto">
                         <div class="card-body p-4 p-md-5">
                             <nav class="ff-kiosk-language d-flex justify-content-end gap-2 mb-3" aria-label="Language">
-                                <a class="btn btn-sm btn-outline-secondary" t-att-href="'/ff_face_attendance/enroll?lang=en_US' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">English</a>
-                                <a class="btn btn-sm btn-outline-secondary" t-att-href="'/ff_face_attendance/enroll?lang=ar_001' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">العربية</a>
+                                <a class="btn btn-sm btn-outline-secondary" t-att-href="enrollment_path + '?lang=en_US' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">English</a>
+                                <a class="btn btn-sm btn-outline-secondary" t-att-href="enrollment_path + '?lang=ar_001' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">العربية</a>
                             </nav>
-                            <h1 id="ff-kiosk-title" class="h2">Employee attendance</h1>
-                            <p class="text-muted">Stand in front of the camera, center your face in the guide, then follow the movement prompt.</p>
+                            <h1 id="ff-kiosk-title" class="h2"><t t-if="admin_mode">Face Enrollment — HR Manager</t><t t-else="">Employee attendance</t></h1>
+                            <p class="text-muted"><t t-if="admin_mode">Select an employee, obtain consent, and record the supervised face samples from this HR-only page.</t><t t-else="">Stand in front of the camera, center your face in the guide, then follow the movement prompt.</t></p>
                             <div class="alert alert-warning" role="status">Free supervised pilot. Keep Badge/PIN available as the normal fallback.</div>
-                            <div class="alert alert-info">The kiosk connection is managed by HR. The one-time setup credential is consumed during provisioning and is never shown on this employee registration page. <a href="/ff_face_attendance/native_kiosk">Open the standard Odoo Badge/PIN attendance kiosk</a>.</div>
+                            <div class="alert alert-info"><t t-if="admin_mode">This page is restricted to HR managers. Choose the employee below, then click Register face (HR).</t><t t-else="">The kiosk connection is managed by HR. The one-time setup credential is consumed during provisioning and is never shown on this employee registration page. <a href="/ff_face_attendance/native_kiosk">Open the standard Odoo Badge/PIN attendance kiosk</a>.</t></div>
                             <button id="ff-camera-start" class="btn btn-outline-secondary ms-2" type="button">Check camera</button>
                             <div id="ff-employee-lookup" class="mt-3 ff-employee-lookup position-relative">
                                 <label class="form-label" for="ff-employee-search">Employee name</label>
@@ -66,7 +66,7 @@
                                 <button id="ff-landmarks-toggle" class="btn btn-outline-secondary btn-sm mt-1" type="button" disabled="disabled">Show face points</button>
                                 <span id="ff-landmark-status" class="small text-muted ms-2" role="status" aria-live="polite"><t t-if="kiosk_language and kiosk_language.startswith('ar')">نقاط الوجه متوقفة؛ تظل معاينة الكاميرا داخل هذا المتصفح.</t><t t-else="">Points are off; camera preview stays in this browser.</t></span>
                             </div>
-                            <div class="ff-attendance-actions mt-3">
+                            <div t-att-class="'ff-attendance-actions mt-3 d-none' if admin_mode else 'ff-attendance-actions mt-3'">
                                 <button id="ff-check-in" class="btn btn-success btn-lg" type="button" disabled="disabled">Check in</button>
                                 <button id="ff-check-out" class="btn btn-outline-danger btn-lg" type="button" disabled="disabled">Check out</button>
                             </div>

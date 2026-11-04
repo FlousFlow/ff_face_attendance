@@ -65,7 +65,7 @@ class TestFaceAttendanceFoundation(HttpCase):
         employee = self.env["hr.employee"].create({"name": "Kiosk Action Test"})
         action = employee.action_open_face_enrollment_kiosk()
         self.assertEqual(action["target"], "new")
-        self.assertEqual(action["url"], f"/ff_face_attendance/enroll?employee_id={employee.id}")
+        self.assertEqual(action["url"], f"/ff_face_attendance/admin/enroll?employee_id={employee.id}")
 
     def test_enrollment_acknowledgment_is_immutable(self):
         employee = self.env["hr.employee"].create({"name": "Consent Test"})
