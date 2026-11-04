@@ -19,11 +19,13 @@
     ],
     "assets": {
         "web.assets_backend": ["ff_face_attendance/static/src/device_credential_action.js"],
-        "hr_attendance.assets_public_attendance": [
-            "ff_face_attendance/static/src/public_kiosk_face.xml",
+        "web.assets_frontend": [
             "ff_face_attendance/static/src/kiosk.js",
             "ff_face_attendance/static/src/kiosk.css",
             "ff_face_attendance/static/src/kiosk.scss",
+        ],
+        "hr_attendance.assets_public_attendance": [
+            "ff_face_attendance/static/src/public_kiosk_face.xml",
         ],
     },
     "installable": True,

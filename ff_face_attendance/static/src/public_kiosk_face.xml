@@ -2,96 +2,9 @@
 <templates xml:space="preserve">
     <t t-inherit="hr_attendance.public_kiosk_app" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('o_hr_kiosk_mode_bottom')]" position="inside">
-            <button id="ff-face-open" type="button" class="btn btn-light btn-lg rounded-3">
+            <a id="ff-face-open" href="/ff_face_attendance/enroll" class="btn btn-light btn-lg rounded-3">
                 <i class="fa fa-camera me-2"/> Face Attendance
-            </button>
+            </a>
         </xpath>
-        <xpath expr="//CardLayout" position="inside">
-            <t t-call="ff_face_attendance.FaceKioskPanel"/>
-        </xpath>
-    </t>
-
-    <t t-name="ff_face_attendance.FaceKioskPanel">
-        <style>
-            .o_hr_attendance_kiosk_face_panel { width: 100%; max-width: 56rem; max-height: 75vh; overflow-y: auto; margin: 1rem auto; padding: 1.5rem; border: 1px solid var(--border-color, #dee2e6); border-radius: .75rem; background: var(--body-bg, #fff); box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .12); }
-            .ff-face-kiosk { max-width: 48rem; }
-            .ff-face-kiosk .ff-camera-stage { position: relative; min-height: 22rem; overflow: hidden; border-radius: .75rem; background: #111; }
-            .ff-face-kiosk video { width: 100%; height: 28rem; object-fit: cover; background: #161616; transform: scaleX(-1); }
-            .ff-face-kiosk .ff-face-guide { position: absolute; inset: 8% 20%; display: grid; place-items: end center; border: 3px dashed rgba(255, 255, 255, .8); border-radius: 48% 48% 44% 44%; pointer-events: none; color: #fff; text-shadow: 0 1px 4px #000; }
-            .ff-face-kiosk .ff-face-guide span { margin-bottom: .75rem; }
-            .ff-face-kiosk .ff-face-guide.is-live { border-color: #ffc247; }
-            .ff-face-kiosk .ff-landmark-overlay { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); pointer-events: none; }
-            .ff-face-kiosk .ff-motion-prompt { position: absolute; inset: auto 0 1rem; width: fit-content; margin: auto; padding: .8rem 1.2rem; border-radius: .75rem; background: #6f42c1; color: #fff; font-size: 1.3rem; font-weight: 700; box-shadow: 0 2px 12px #0008; }
-            .ff-face-kiosk .ff-attendance-actions { display: flex; gap: 1rem; }
-            @media (max-width: 576px) { .ff-face-kiosk video { height: 22rem; } .ff-face-kiosk .ff-face-guide { inset-inline: 12%; } .ff-face-kiosk .ff-attendance-actions { flex-direction: column; } }
-        </style>
-        <main id="ff-face-panel" class="ff-face-kiosk o_hr_attendance_kiosk_face_panel d-none" data-local-demo="false" data-requested-employee="" aria-labelledby="ff-face-kiosk-title">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h2 id="ff-face-kiosk-title" class="h4 mb-0">Face Attendance</h2>
-                <button id="ff-face-close" type="button" class="btn btn-light btn-sm" aria-label="Close face attendance">
-                    <i class="fa fa-times me-1"/> Back to kiosk
-                </button>
-            </div>
-            <div class="alert alert-warning" role="status">Supervised face pilot. Badge/PIN and the standard Odoo attendance kiosk remain available.</div>
-            <div class="ff-kiosk-manual-setup mb-3">
-                <label for="ff-device-credential" class="form-label">One-time kiosk setup credential</label>
-                <div class="input-group">
-                    <input id="ff-device-credential" class="form-control" type="password" autocomplete="off" spellcheck="false"/>
-                    <button id="ff-kiosk-pair" class="btn btn-primary" type="button">Secure this kiosk</button>
-                </div>
-            </div>
-            <div class="d-flex gap-2 mb-3">
-                <button id="ff-camera-start" class="btn btn-outline-secondary" type="button">Check camera</button>
-            </div>
-            <div id="ff-employee-lookup" class="mt-3 ff-employee-lookup position-relative">
-                <label class="form-label" for="ff-employee-search">Employee name</label>
-                <div class="input-group">
-                    <input id="ff-employee-search" class="form-control" type="search" autocomplete="off" placeholder="Search by employee name" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ff-employee-options"/>
-                    <button id="ff-employee-continue" class="btn btn-primary" type="button" disabled="disabled">Continue</button>
-                </div>
-                <div id="ff-employee-options" class="list-group position-absolute w-100 shadow d-none" role="listbox" style="z-index: 10"/>
-            </div>
-            <p id="ff-employee-name" class="mt-2 fw-semibold d-none"/>
-            <div id="ff-first-time-enrollment" class="alert alert-info mt-3 d-none">
-                <strong>Face enrollment</strong>
-                <p class="mb-2">The employee must review and acknowledge the notice before HR starts. Enrollment sends prompted camera samples to the configured private face service.</p>
-                <label id="ff-enrollment-consent-wrap" class="form-check d-none">
-                    <input id="ff-enrollment-consent" class="form-check-input" type="checkbox"/>
-                    <span class="form-check-label">The employee has reviewed this notice and agrees to this supervised face pilot.</span>
-                </label>
-                <button id="ff-pilot-enroll" class="btn btn-outline-primary mt-2 d-none" type="button">Register face (HR)</button>
-                <p id="ff-hr-enrollment-hint" class="mb-0 mt-2 d-none">Ask an HR manager to register this employee.</p>
-            </div>
-            <div id="ff-revocation-pending" class="alert alert-warning mt-3 d-none" role="status">Face data deletion is pending. Use Badge/PIN meanwhile.</div>
-            <div id="ff-enrolled-hint" class="text-success mt-3 d-none">
-                <p id="ff-enrolled-hint-text">Your face is registered. Choose Check in or Check out below.</p>
-                <div id="ff-reenroll-controls" class="d-none">
-                    <label class="form-check">
-                        <input id="ff-reenroll-consent" class="form-check-input" type="checkbox"/>
-                        <span class="form-check-label">The employee has reviewed the face-processing notice and agrees to replace the stored samples.</span>
-                    </label>
-                    <button id="ff-pilot-reenroll" class="btn btn-outline-secondary btn-sm mt-2" type="button">Replace face samples (HR)</button>
-                </div>
-            </div>
-            <div class="ff-camera-stage mt-3">
-                <video id="ff-kiosk-camera" class="d-none" autoplay="autoplay" muted="muted" playsinline="playsinline" aria-label="Camera preview"/>
-                <canvas id="ff-landmark-overlay" class="ff-landmark-overlay d-none" aria-hidden="true"/>
-                <div id="ff-face-guide" class="ff-face-guide" aria-hidden="true"><span>Camera starts after you continue</span></div>
-                <div id="ff-motion-prompt" class="ff-motion-prompt d-none" role="status" aria-live="assertive"/>
-            </div>
-            <div class="ff-landmark-controls mt-2">
-                <label class="form-check">
-                    <input id="ff-landmark-consent" class="form-check-input" type="checkbox"/>
-                    <span class="form-check-label">Show alignment points. Frames are processed in memory and not saved.</span>
-                </label>
-                <button id="ff-landmarks-toggle" class="btn btn-outline-secondary btn-sm mt-1" type="button" disabled="disabled">Show face points</button>
-                <span id="ff-landmark-status" class="small text-muted ms-2" role="status" aria-live="polite">Points are off; camera preview stays in this browser.</span>
-            </div>
-            <div class="ff-attendance-actions mt-3">
-                <button id="ff-check-in" class="btn btn-success btn-lg" type="button" disabled="disabled">Check in</button>
-                <button id="ff-check-out" class="btn btn-outline-danger btn-lg" type="button" disabled="disabled">Check out</button>
-            </div>
-            <div id="ff-kiosk-status" class="mt-3" role="status" aria-live="polite"/>
-        </main>
     </t>
 </templates>

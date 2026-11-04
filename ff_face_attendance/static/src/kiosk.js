@@ -221,10 +221,11 @@ const initializeFaceKiosk = () => {
             say(local ? "Could not connect the local kiosk. Check that one active kiosk is configured for this company." : "Kiosk setup failed. Check the one-time credential.", "danger");
         }
     };
+    const pairButton = byId("ff-kiosk-pair");
     if (localDemo) {
         pairKiosk(true);
     } else {
-        byId("ff-kiosk-pair").addEventListener("click", () => pairKiosk(false));
+        pairButton?.addEventListener("click", () => pairKiosk(false));
         fetch("/ff_face_attendance/device/status", { credentials: "same-origin" })
             .then((response) => response.json())
             .then((result) => {
@@ -235,7 +236,7 @@ const initializeFaceKiosk = () => {
                 if (requestedEmployeeId) return loadEmployeeStatus(requestedEmployeeId);
                 say("Kiosk is already connected. Search and select your employee name to continue.", "success");
             })
-            .catch(() => say("Could not check kiosk pairing. Use the one-time setup credential if needed.", "warning"));
+            .catch(() => say("Could not check the kiosk connection. Ask HR to provision this kiosk.", "warning"));
     }
 
     byId("ff-camera-start").addEventListener("click", async () => {

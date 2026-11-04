@@ -14,20 +14,13 @@
                     <section class="card shadow-sm mx-auto">
                         <div class="card-body p-4 p-md-5">
                             <nav class="ff-kiosk-language d-flex justify-content-end gap-2 mb-3" aria-label="Language">
-                                <a class="btn btn-sm btn-outline-secondary" t-att-href="'/ff_face_attendance/kiosk?lang=en_US' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">English</a>
-                                <a class="btn btn-sm btn-outline-secondary" t-att-href="'/ff_face_attendance/kiosk?lang=ar_001' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">العربية</a>
+                                <a class="btn btn-sm btn-outline-secondary" t-att-href="'/ff_face_attendance/enroll?lang=en_US' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">English</a>
+                                <a class="btn btn-sm btn-outline-secondary" t-att-href="'/ff_face_attendance/enroll?lang=ar_001' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">العربية</a>
                             </nav>
                             <h1 id="ff-kiosk-title" class="h2">Employee attendance</h1>
                             <p class="text-muted">Stand in front of the camera, center your face in the guide, then follow the movement prompt.</p>
                             <div class="alert alert-warning" role="status">Free supervised pilot. Keep Badge/PIN available as the normal fallback.</div>
-                            <div class="alert alert-info">Prefer not to use face attendance? <a href="/ff_face_attendance/native_kiosk">Open the standard Odoo Badge/PIN attendance kiosk</a>.</div>
-                            <div t-if="not local_demo" class="ff-kiosk-manual-setup">
-                                <div class="mb-3">
-                                    <label for="ff-device-credential" class="form-label">One-time kiosk setup credential</label>
-                                    <input id="ff-device-credential" class="form-control" type="password" autocomplete="off" spellcheck="false"/>
-                                </div>
-                                <button id="ff-kiosk-pair" class="btn btn-primary" type="button">Secure this kiosk</button>
-                            </div>
+                            <div class="alert alert-info">The kiosk connection is managed by HR. The one-time setup credential is consumed during provisioning and is never shown on this employee registration page. <a href="/ff_face_attendance/native_kiosk">Open the standard Odoo Badge/PIN attendance kiosk</a>.</div>
                             <button id="ff-camera-start" class="btn btn-outline-secondary ms-2" type="button">Check camera</button>
                             <div id="ff-employee-lookup" class="mt-3 ff-employee-lookup position-relative">
                                 <label class="form-label" for="ff-employee-search">Employee name</label>

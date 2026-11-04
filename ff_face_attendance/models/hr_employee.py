@@ -19,7 +19,7 @@ class HrEmployee(models.Model):
             raise UserError(_("Archived employees cannot use the face enrollment kiosk."))
         return {
             "type": "ir.actions.act_url",
-            "url": f"/ff_face_attendance/kiosk?employee_id={self.id}",
+            "url": f"/ff_face_attendance/enroll?employee_id={self.id}",
             "target": "new",
         }
 

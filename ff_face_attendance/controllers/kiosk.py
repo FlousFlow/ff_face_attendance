@@ -73,6 +73,40 @@ class FaceKioskController(http.Controller):
             return request.not_found()
         return request.redirect(kiosk_url)
 
+    @http.route("/ff_face_attendance/enroll", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
+    def enrollment_page(self, **kwargs):
+        """Open the dedicated face-enrollment page from the native Odoo kiosk."""
+        requested_language = kwargs.get("lang")
+        language_aliases = {"ar": "ar_001", "ar_001": "ar_001", "en": "en_US", "en_US": "en_US"}
+        language_code = language_aliases.get(requested_language)
+        if language_code:
+            language_code = request.env["res.lang"]._get_code(language_code)
+            if language_code:
+                request.update_context(lang=language_code)
+        device = self._device()
+        company = device.company_id if device else request.env.company
+        requested_employee_id = False
+        if request.env.user.has_group("hr.group_hr_manager"):
+            try:
+                candidate_id = int(kwargs.get("employee_id") or 0)
+            except (TypeError, ValueError):
+                candidate_id = 0
+            if candidate_id and request.env["hr.employee"].sudo().search_count([
+                ("id", "=", candidate_id), ("company_id", "=", company.id), ("active", "=", True),
+            ]):
+                requested_employee_id = candidate_id
+        response = request.render("ff_face_attendance.public_face_kiosk", {
+            "local_demo": self._is_local_demo(),
+            "requested_employee_id": requested_employee_id,
+            "kiosk_language": request.env.lang,
+        })
+        if language_code:
+            response.set_cookie(
+                "frontend_lang", language_code, max_age=60 * 60 * 24 * 365,
+                path="/", secure=request.httprequest.is_secure, httponly=False, samesite="Lax",
+            )
+        return response
+
     @http.route("/ff_face_attendance/device/status", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def kiosk_device_status(self, **kwargs):
         return _json({"paired": bool(self._device())})
