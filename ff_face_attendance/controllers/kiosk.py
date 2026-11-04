@@ -204,10 +204,11 @@ class FaceKioskController(http.Controller):
         if device:
             return _json({"paired": True, "pin_required": False})
         scope_company = self._kiosk_scope_company()
+        authenticated_company = self._kiosk_authenticated_company()
         if scope_company:
             scoped_devices = self._scoped_devices(scope_company)
             if len(scoped_devices) == 1 and scoped_devices[0].kiosk_pin_hash:
-                return _json({"paired": False, "pin_required": True})
+                return _json({"paired": False, "pin_required": True, "_debug_scope": bool(scope_company), "_debug_auth": bool(authenticated_company)})
         return _json({"paired": False, "pin_required": False})
 
     @http.route("/ff_face_attendance/device/pin/verify", type="http", auth="public", methods=["POST"], csrf=False, sitemap=False)
