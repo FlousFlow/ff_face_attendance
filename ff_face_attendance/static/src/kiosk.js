@@ -127,7 +127,7 @@ const initializeFaceKiosk = () => {
         if (employeeSearchTimer) window.clearTimeout(employeeSearchTimer);
         if (employeeSearchController) employeeSearchController.abort();
         const query = employeeSearch.value.trim();
-        if (query.length < 2 || !hasEmployeeAccess()) return hideEmployeeOptions();
+        if (!query || !hasEmployeeAccess()) return hideEmployeeOptions();
         employeeSearchTimer = window.setTimeout(async () => {
             employeeSearchController = new AbortController();
             try {

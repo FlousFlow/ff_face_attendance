@@ -211,12 +211,18 @@ class FaceKioskController(http.Controller):
         try:
             data = json.loads(request.httprequest.get_data(cache=False))
             query = data.get("query")
-            if not isinstance(query, str) or len(query.strip()) < 2:
+            if not isinstance(query, str) or not query.strip():
                 return _json({"employees": []})
+            term = query.strip()
             employees = request.env["hr.employee"].sudo().search([
                 ("company_id", "=", company.id),
                 ("active", "=", True),
-                ("name", "ilike", query.strip()),
+                "|", "|", "|", "|",
+                ("name", "ilike", term),
+                ("work_email", "ilike", term),
+                ("work_phone", "ilike", term),
+                ("barcode", "ilike", term),
+                ("user_id.login", "ilike", term),
             ], order="name, id", limit=20)
             return _json({"employees": [{
                 "id": employee.id,
