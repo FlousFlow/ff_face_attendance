@@ -77,6 +77,31 @@ const initializeFaceKiosk = () => {
     let landmarkRequestInFlight = false;
     let landmarkTimer = null;
     let kioskLocked = false;
+    const setStage = (stage) => {
+        const stagePin = byId("ff-stage-pin");
+        const stageEmployee = byId("ff-stage-employee");
+        const stageAttendance = byId("ff-stage-attendance");
+        stagePin?.classList.toggle("d-none", stage !== "pin");
+        stageEmployee?.classList.toggle("d-none", stage === "pin");
+        stageAttendance?.classList.toggle("d-none", stage !== "attendance");
+        byId("ff-kiosk-information")?.classList.toggle("d-none", stage === "pin");
+        const descriptions = {
+            pin: "Enter the PIN configured by HR to unlock this kiosk.",
+            employee: "Search for and select the employee who is attending.",
+            attendance: "Choose Check in or Check out, then follow the camera prompt.",
+        };
+        const description = byId("ff-kiosk-description");
+        if (description && descriptions[stage]) description.textContent = tr(descriptions[stage]);
+        byId("ff-employee-lookup")?.classList.toggle("d-none", stage !== "employee");
+        for (const indicator of document.querySelectorAll("[data-stage-indicator]")) {
+            const indicatorStage = indicator.dataset.stageIndicator;
+            const active = indicatorStage === stage;
+            const complete = ["employee", "attendance"].includes(stage)
+                && indicatorStage === "pin";
+            indicator.classList.toggle("active", active);
+            indicator.classList.toggle("complete", complete || (stage === "attendance" && indicatorStage === "employee"));
+        }
+    };
     const setKioskLocked = (locked, message = "") => {
         kioskLocked = locked;
         byId("ff-kiosk-lock")?.classList.toggle("d-none", !locked);
@@ -89,9 +114,12 @@ const initializeFaceKiosk = () => {
         if (locked) {
             byId("ff-check-in")?.toggleAttribute("disabled", true);
             byId("ff-check-out")?.toggleAttribute("disabled", true);
+            setStage("pin");
+        } else if (!selectedEmployeeId) {
+            setStage("employee");
         }
     };
-    setKioskLocked(false);
+    setKioskLocked(!adminMode);
     byId("ff-kiosk-unlock")?.addEventListener("click", async () => {
         const pinInput = byId("ff-kiosk-pin");
         const pinStatus = byId("ff-kiosk-pin-status");
@@ -129,12 +157,14 @@ const initializeFaceKiosk = () => {
         currentEmployee = null;
         byId("ff-employee-continue").disabled = true;
         byId("ff-employee-name").classList.add("d-none");
+        byId("ff-change-employee").classList.add("d-none");
         byId("ff-first-time-enrollment").classList.add("d-none");
         byId("ff-enrolled-hint").classList.add("d-none");
         byId("ff-revocation-pending").classList.add("d-none");
         byId("ff-reenroll-controls").classList.add("d-none");
         byId("ff-check-in").disabled = true;
         byId("ff-check-out").disabled = true;
+        if (!kioskLocked) setStage("employee");
     };
     const hideEmployeeOptions = () => {
         employeeOptions.classList.add("d-none");
@@ -220,9 +250,11 @@ const initializeFaceKiosk = () => {
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || "employee_lookup_failed");
             currentEmployee = result;
-            byId("ff-employee-lookup").classList.toggle("d-none", requestedEmployeeId === employeeId);
+            setStage("attendance");
+            byId("ff-employee-lookup").classList.add("d-none");
             byId("ff-employee-name").textContent = tr("Hello, %s").replace("%s", result.employee_name);
             byId("ff-employee-name").classList.remove("d-none");
+            byId("ff-change-employee").classList.remove("d-none");
             const revocationPending = result.enrollment_status === "revocation_pending";
             byId("ff-first-time-enrollment").classList.toggle("d-none", result.enrolled || revocationPending);
             byId("ff-enrollment-consent-wrap").classList.toggle("d-none", !result.can_register);
@@ -241,6 +273,11 @@ const initializeFaceKiosk = () => {
     byId("ff-employee-continue").addEventListener("click", async () => {
         if (!selectedEmployeeId) return say("Search for and select your name first.", "warning");
         await loadEmployeeStatus(selectedEmployeeId);
+    });
+    byId("ff-change-employee")?.addEventListener("click", () => {
+        clearEmployeeSelection();
+        employeeSearch.value = "";
+        employeeSearch.focus();
     });
 
     const pairKiosk = async (local = false) => {

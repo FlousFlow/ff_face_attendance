@@ -15,9 +15,17 @@
                     <section class="o_hr_attendance_kiosk_card card rounded-3 mx-auto w-100">
                         <div class="card-body p-4 p-md-5">
                             <h1 id="ff-kiosk-title" class="h2"><t t-if="admin_mode">Face Enrollment — HR Manager</t><t t-else="">Employee attendance</t></h1>
-                            <p class="text-muted"><t t-if="admin_mode">Select an employee, obtain consent, and record the supervised face samples from this HR-only page.</t><t t-else="">Stand in front of the camera, center your face in the guide, then follow the movement prompt.</t></p>
-                            <div class="alert alert-warning" role="status">Free supervised pilot. Keep Badge/PIN available as the normal fallback.</div>
-                            <div class="alert alert-info"><t t-if="admin_mode">This page is restricted to HR managers. Choose the employee below, then click Register face (HR).</t><t t-else="">The kiosk connection is managed by HR. The one-time setup credential is consumed during provisioning and is never shown on this employee registration page. <a href="/ff_face_attendance/native_kiosk">Open the standard Odoo Badge/PIN attendance kiosk</a>.</t></div>
+                            <p id="ff-kiosk-description" class="text-muted"><t t-if="admin_mode">Select an employee, obtain consent, and record the supervised face samples from this HR-only page.</t><t t-else="">Enter the PIN configured by HR to unlock this kiosk.</t></p>
+                            <ol id="ff-kiosk-steps" class="ff-kiosk-steps list-unstyled d-flex flex-column flex-sm-row gap-2 mb-4" aria-label="Attendance steps">
+                                <li data-stage-indicator="pin" class="ff-kiosk-step active"><span class="badge rounded-pill">1</span><span>Unlock kiosk</span></li>
+                                <li data-stage-indicator="employee" class="ff-kiosk-step"><span class="badge rounded-pill">2</span><span>Select employee</span></li>
+                                <li data-stage-indicator="attendance" class="ff-kiosk-step"><span class="badge rounded-pill">3</span><span>Choose attendance</span></li>
+                            </ol>
+                            <div id="ff-kiosk-information" class="d-none">
+                                <div class="alert alert-warning" role="status"><t t-if="admin_mode">HR-only supervised enrollment. Badge/PIN attendance remains available.</t><t t-else="">Supervised face attendance. Keep Badge/PIN available as the normal fallback.</t></div>
+                                <div class="alert alert-info"><t t-if="admin_mode">This page is restricted to HR managers. Select the employee, obtain consent, then register the face.</t><t t-else="">The kiosk connection is managed by HR. The one-time setup credential is never shown on this attendance page. <a href="/ff_face_attendance/native_kiosk">Open the standard Odoo Badge/PIN attendance kiosk</a>.</t></div>
+                            </div>
+                            <div id="ff-stage-pin">
                             <div id="ff-kiosk-lock" class="alert alert-warning d-none" role="alert">
                                 <strong>Kiosk locked.</strong> Enter the PIN configured by HR to continue.
                                 <div class="input-group mt-2">
@@ -26,7 +34,8 @@
                                 </div>
                                 <div id="ff-kiosk-pin-status" class="mt-2" role="status"></div>
                             </div>
-                            <button id="ff-camera-start" class="btn btn-outline-secondary ms-2" type="button">Check camera</button>
+                            </div>
+                            <div id="ff-stage-employee">
                             <div id="ff-employee-lookup" class="mt-3 ff-employee-lookup position-relative">
                                 <label class="form-label" for="ff-employee-search">Employee name</label>
                                 <div class="input-group">
@@ -35,7 +44,13 @@
                                 </div>
                                 <div id="ff-employee-options" class="list-group position-absolute w-100 shadow d-none" role="listbox" style="z-index: 10"/>
                             </div>
-                            <p id="ff-employee-name" class="mt-2 fw-semibold d-none"></p>
+                            <div class="d-flex align-items-center gap-2 mt-2">
+                                <p id="ff-employee-name" class="mb-0 fw-semibold d-none"></p>
+                                <button id="ff-change-employee" class="btn btn-link btn-sm d-none p-0" type="button">Change employee</button>
+                            </div>
+                            </div>
+                            <div id="ff-stage-attendance" class="d-none">
+                            <button id="ff-camera-start" class="btn btn-outline-secondary mb-3" type="button">Check camera</button>
                             <div id="ff-first-time-enrollment" class="alert alert-info mt-3 d-none">
                                 <strong>Face enrollment</strong>
                                 <p class="mb-2">The employee must review and acknowledge the notice below before HR starts. Enrollment sends 3–10 camera samples to the configured private face service. Odoo keeps the acknowledgment and enrollment metadata; the service stores encrypted enrollment crops until HR revokes them.</p>
@@ -76,6 +91,7 @@
                                 <button id="ff-check-out" class="btn btn-outline-danger btn-lg" type="button" disabled="disabled">Check out</button>
                             </div>
                             <div id="ff-kiosk-status" class="mt-3" role="status" aria-live="polite"></div>
+                            </div>
                         </div>
                     </section>
                 </main>

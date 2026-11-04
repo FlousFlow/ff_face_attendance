@@ -15,7 +15,45 @@
     width: 100%;
     min-height: 100%;
 
-    > .o_hr_attendance_kiosk_card { min-width: 0; }
+    > .o_hr_attendance_kiosk_card {
+        min-width: 0;
+        width: 100%;
+        max-width: 72rem;
+    }
+
+    .ff-kiosk-steps {
+        border-bottom: 1px solid var(--border-color, #dee2e6);
+        padding-bottom: 1rem;
+    }
+
+    .ff-kiosk-step {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        color: var(--text-muted, #6c757d);
+        font-weight: 600;
+        flex: 1;
+
+        .badge {
+            background: var(--secondary, #6c757d);
+            color: #fff;
+            min-width: 1.75rem;
+            min-height: 1.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        &.active {
+            color: var(--primary, #714b67);
+            .badge { background: var(--primary, #714b67); }
+        }
+
+        &.complete {
+            color: var(--success, #198754);
+            .badge { background: var(--success, #198754); }
+        }
+    }
 
     .ff-camera-stage {
         position: relative;
