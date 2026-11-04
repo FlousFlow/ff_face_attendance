@@ -12,12 +12,10 @@
 }
 
 .ff-face-kiosk {
-    max-width: 75rem;
+    width: 100%;
     min-height: 100%;
 
-    > .o_hr_attendance_kiosk_card {
-        min-width: 75%;
-    }
+    > .o_hr_attendance_kiosk_card { min-width: 0; }
 
     .ff-camera-stage {
         position: relative;

@@ -14,10 +14,6 @@
                 <main class="ff-face-kiosk o_hr_kiosk_mode_main d-flex flex-column gap-3 m-auto w-100 h-100 overflow-auto px-3" aria-labelledby="ff-kiosk-title" t-att-data-local-demo="'true' if local_demo else 'false'" t-att-data-enrollment-only="'true' if enrollment_only else 'false'" t-att-data-admin-mode="'true' if admin_mode else 'false'" t-att-data-requested-employee="requested_employee_id or ''" t-att-lang="kiosk_language" t-att-dir="'rtl' if kiosk_language and kiosk_language.startswith('ar') else 'ltr'">
                     <section class="o_hr_attendance_kiosk_card card rounded-3 mx-auto w-100">
                         <div class="card-body p-4 p-md-5">
-                            <nav class="ff-kiosk-language d-flex justify-content-end gap-2 mb-3" aria-label="Language">
-                                <a class="btn btn-sm btn-outline-secondary" t-att-href="enrollment_path + '?lang=en_US' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">English</a>
-                                <a class="btn btn-sm btn-outline-secondary" t-att-href="enrollment_path + '?lang=ar_001' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">العربية</a>
-                            </nav>
                             <h1 id="ff-kiosk-title" class="h2"><t t-if="admin_mode">Face Enrollment — HR Manager</t><t t-else="">Employee attendance</t></h1>
                             <p class="text-muted"><t t-if="admin_mode">Select an employee, obtain consent, and record the supervised face samples from this HR-only page.</t><t t-else="">Stand in front of the camera, center your face in the guide, then follow the movement prompt.</t></p>
                             <div class="alert alert-warning" role="status">Free supervised pilot. Keep Badge/PIN available as the normal fallback.</div>
@@ -84,8 +80,18 @@
                     </section>
                 </main>
             </t>
-            <body class="o_web_client o_hr_attendance_kiosk_body">
-                <t t-out="body"/>
+            <body class="o_web_client o_hr_attendance_kiosk_body position-relative">
+                <div class="o_attendance_background d-flex flex-column h-100">
+                    <div class="p-2 d-flex justify-content-end">
+                        <nav class="ff-kiosk-language d-flex gap-2" aria-label="Language">
+                            <a class="btn btn-light btn-sm rounded-3" t-att-href="enrollment_path + '?lang=en_US' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">English</a>
+                            <a class="btn btn-light btn-sm rounded-3" t-att-href="enrollment_path + '?lang=ar_001' + ('&amp;employee_id=%s' % requested_employee_id if requested_employee_id else '')">العربية</a>
+                        </nav>
+                    </div>
+                    <div class="o_hr_attendance_kiosk_mode d-flex flex-column w-100 h-100 overflow-auto px-3">
+                        <t t-out="body"/>
+                    </div>
+                </div>
                 <script>document.documentElement.lang = document.querySelector(".ff-face-kiosk")?.getAttribute("lang") || "en_US";</script>
             </body>
         </t>
