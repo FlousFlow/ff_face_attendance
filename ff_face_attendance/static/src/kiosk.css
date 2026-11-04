@@ -1,5 +1,6 @@
 .o_hr_attendance_kiosk_face_panel {
-    width: min(100%, 56rem);
+    width: 100%;
+    max-width: 56rem;
     max-height: 75vh;
     overflow-y: auto;
     margin: 1rem auto;
