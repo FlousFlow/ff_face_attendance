@@ -434,19 +434,19 @@ const initializeFaceKiosk = () => {
             prompt.textContent = tr("Look straight at the camera");
             prompt.classList.remove("d-none");
             beep(660);
-            await new Promise((resolve) => setTimeout(resolve, 1200));
+            await new Promise((resolve) => setTimeout(resolve, 800));
             context.drawImage(video, 0, 0);
             frames.push(canvas.toDataURL("image/jpeg", 0.82).split(",", 2)[1]);
         }
         prompt.textContent = tr("Turn your own %s and hold").replace("%s", direction);
         prompt.classList.remove("d-none");
         beep(740);
-        await new Promise((resolve) => setTimeout(resolve, guided ? 2500 : 1800));
+        await new Promise((resolve) => setTimeout(resolve, guided ? 1400 : 1200));
         const targetFrames = guided ? 4 : 5;
         for (let index = 0; index < targetFrames; index += 1) {
             context.drawImage(video, 0, 0);
             frames.push(canvas.toDataURL("image/jpeg", 0.82).split(",", 2)[1]);
-            await new Promise((resolve) => setTimeout(resolve, guided ? 600 : 350));
+            await new Promise((resolve) => setTimeout(resolve, guided ? 300 : 250));
         }
         prompt.classList.add("d-none");
         return frames;
