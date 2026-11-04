@@ -11,10 +11,20 @@ const tr = (message, ...substitutions) => {
     }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+const initializeFaceKiosk = () => {
     const status = document.getElementById("ff-kiosk-status");
-    if (!status) return;
+    if (!status || status.dataset.ffInitialized === "1") return Boolean(status);
+    status.dataset.ffInitialized = "1";
     const byId = (id) => document.getElementById(id);
+    const facePanel = byId("ff-face-panel");
+    const openFaceButton = byId("ff-face-open");
+    const closeFaceButton = byId("ff-face-close");
+    const setFacePanelVisible = (visible) => {
+        facePanel?.classList.toggle("d-none", !visible);
+        if (visible) byId("ff-device-credential")?.focus();
+    };
+    openFaceButton?.addEventListener("click", () => setFacePanelVisible(true));
+    closeFaceButton?.addEventListener("click", () => setFacePanelVisible(false));
     const localDemo = status.closest("main")?.dataset.localDemo === "true";
     translationIsReady.then(() => {
         const sourceMessage = status.dataset.sourceMessage;
@@ -487,4 +497,19 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     byId("ff-check-in").addEventListener("click", () => verifyAttendance("check_in"));
     byId("ff-check-out").addEventListener("click", () => verifyAttendance("check_out"));
-});
+    return true;
+};
+
+const bootFaceKiosk = () => {
+    if (initializeFaceKiosk()) return;
+    const observer = new MutationObserver(() => {
+        if (initializeFaceKiosk()) observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootFaceKiosk, { once: true });
+} else {
+    bootFaceKiosk();
+}

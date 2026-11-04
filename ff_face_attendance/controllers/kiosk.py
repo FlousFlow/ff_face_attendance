@@ -63,37 +63,15 @@ class FaceKioskController(http.Controller):
 
     @http.route("/ff_face_attendance/kiosk", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def kiosk_page(self, **kwargs):
-        requested_language = kwargs.get("lang")
-        language_aliases = {"ar": "ar_001", "ar_001": "ar_001", "en": "en_US", "en_US": "en_US"}
-        language_code = language_aliases.get(requested_language)
-        if language_code:
-            language_code = request.env["res.lang"]._get_code(language_code)
-            if language_code:
-                request.update_context(lang=language_code)
-        local_demo = self._is_local_demo()
+        # Keep the old URL as a compatibility alias, but always use the native
+        # Odoo Attendance Kiosk so face verification lives inside the standard
+        # Odoo kiosk experience rather than a separate frontend page.
         device = self._device()
         company = device.company_id if device else request.env.company
-        requested_employee_id = False
-        if request.env.user.has_group("hr.group_hr_manager"):
-            try:
-                candidate_id = int(kwargs.get("employee_id") or 0)
-            except (TypeError, ValueError):
-                candidate_id = 0
-            if candidate_id and request.env["hr.employee"].sudo().search_count([
-                ("id", "=", candidate_id), ("company_id", "=", company.id), ("active", "=", True),
-            ]):
-                requested_employee_id = candidate_id
-        response = request.render("ff_face_attendance.public_face_kiosk", {
-            "local_demo": local_demo,
-            "requested_employee_id": requested_employee_id,
-            "kiosk_language": request.env.lang,
-        })
-        if language_code:
-            response.set_cookie(
-                "frontend_lang", language_code, max_age=60 * 60 * 24 * 365,
-                path="/", secure=request.httprequest.is_secure, httponly=False, samesite="Lax",
-            )
-        return response
+        kiosk_url = company.sudo().attendance_kiosk_url
+        if not kiosk_url:
+            return request.not_found()
+        return request.redirect(kiosk_url)
 
     @http.route("/ff_face_attendance/device/status", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def kiosk_device_status(self, **kwargs):

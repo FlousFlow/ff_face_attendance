@@ -1,6 +1,6 @@
 {
     "name": "Face Attendance",
-    "version": "19.0.0.2.9",
+    "version": "19.0.0.3.0",
     "category": "Human Resources/Attendances",
     "summary": "Odoo 19 face attendance with documented private service setup",
     "description": "Adds an HR-managed, opt-in face-attendance pilot to native Odoo attendance. The Odoo addon communicates with a separately installed private face service and never downloads, installs, or launches external executables. A checksum-verified Ubuntu server command is documented for self-hosted deployments; an HR manager then pairs the service in Odoo with a one-time code. Face enrollment and verification samples stay on the customer's host. An explicitly enabled alignment guide sends one resized frame per second to the local service for five YuNet points; frames are processed in memory and not saved. Enrollment crops are encrypted and deleted after HR revocation. The free LBPH/YuNet matcher remains experimental and does not provide robust anti-spoofing. Badge/PIN remains the alternative.",
@@ -19,7 +19,11 @@
     ],
     "assets": {
         "web.assets_backend": ["ff_face_attendance/static/src/device_credential_action.js"],
-        "web.assets_frontend": ["ff_face_attendance/static/src/kiosk.js", "ff_face_attendance/static/src/kiosk.scss"],
+        "hr_attendance.assets_public_attendance": [
+            "ff_face_attendance/static/src/public_kiosk_face.xml",
+            "ff_face_attendance/static/src/kiosk.js",
+            "ff_face_attendance/static/src/kiosk.scss",
+        ],
     },
     "installable": True,
     "application": True,
