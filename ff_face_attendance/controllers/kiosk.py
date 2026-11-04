@@ -109,9 +109,8 @@ class FaceKioskController(http.Controller):
         # Keep the old URL as a compatibility alias, but always use the native
         # Odoo Attendance Kiosk so face verification lives inside the standard
         # Odoo kiosk experience rather than a separate frontend page.
-        kiosk_company = self._company_from_kiosk_token(kwargs.get("kiosk_token"))
         device = self._device()
-        company = kiosk_company or (device.company_id if device else request.env.company)
+        company = device.company_id if device else request.env.company
         kiosk_url = company.sudo().attendance_kiosk_url
         if not kiosk_url:
             return request.not_found()
@@ -127,8 +126,9 @@ class FaceKioskController(http.Controller):
             language_code = request.env["res.lang"]._get_code(language_code)
             if language_code:
                 request.update_context(lang=language_code)
+        kiosk_company = self._company_from_kiosk_token(kwargs.get("kiosk_token"))
         device = self._device()
-        company = device.company_id if device else request.env.company
+        company = kiosk_company or (device.company_id if device else request.env.company)
         requested_employee_id = False
         if request.env.user.has_group("hr.group_hr_manager"):
             try:
