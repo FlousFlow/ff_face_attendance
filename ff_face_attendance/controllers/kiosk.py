@@ -59,13 +59,47 @@ class FaceKioskController(http.Controller):
         ], limit=1)
         if device and hmac.compare_digest(device.credential_hash or "", digest):
             return device
+        scope_company = self._kiosk_scope_company()
+        if scope_company:
+            scoped_devices = request.env["ff.face.device"].sudo().search([
+                ("company_id", "=", scope_company.id), ("active", "=", True), ("revoked_at", "=", False),
+            ], limit=2)
+            return scoped_devices if len(scoped_devices) == 1 else None
         return None
+
+    @staticmethod
+    def _scope_signature(payload):
+        params = request.env["ir.config_parameter"].sudo()
+        secret = params.get_param("ff_face_attendance.service_hmac_secret") or params.get_param("database.secret")
+        return hmac.new(secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
+
+    def _kiosk_scope_company(self):
+        raw = request.httprequest.cookies.get("ff_face_kiosk_scope", "")
+        try:
+            company_id, issued_at, signature = raw.split(":", 2)
+            issued_at = int(issued_at)
+            if time.time() - issued_at > 8 * 60 * 60:
+                return None
+            payload = f"{company_id}:{issued_at}"
+            if not hmac.compare_digest(signature, self._scope_signature(payload)):
+                return None
+            return request.env["res.company"].sudo().browse(int(company_id)).exists()
+        except (TypeError, ValueError):
+            return None
+
+    def _company_from_kiosk_token(self, token):
+        if not token or len(token) > 128:
+            return None
+        return request.env["res.company"].sudo().search([("attendance_kiosk_key", "=", token)], limit=1)
 
     def _enrollment_company(self):
         """Return the kiosk company, or the authenticated HR manager company."""
         device = self._device()
         if device:
             return device.company_id
+        scope_company = self._kiosk_scope_company()
+        if scope_company:
+            return scope_company
         if request.env.user.has_group("hr.group_hr_manager"):
             return request.env.company
         return None
@@ -75,8 +109,9 @@ class FaceKioskController(http.Controller):
         # Keep the old URL as a compatibility alias, but always use the native
         # Odoo Attendance Kiosk so face verification lives inside the standard
         # Odoo kiosk experience rather than a separate frontend page.
+        kiosk_company = self._company_from_kiosk_token(kwargs.get("kiosk_token"))
         device = self._device()
-        company = device.company_id if device else request.env.company
+        company = kiosk_company or (device.company_id if device else request.env.company)
         kiosk_url = company.sudo().attendance_kiosk_url
         if not kiosk_url:
             return request.not_found()
@@ -106,10 +141,18 @@ class FaceKioskController(http.Controller):
                 requested_employee_id = candidate_id
         response = request.render("ff_face_attendance.public_face_kiosk", {
             "local_demo": self._is_local_demo(),
-            "enrollment_only": bool(request.env.user.has_group("hr.group_hr_manager") and not device),
+            "enrollment_only": bool(request.env.user.has_group("hr.group_hr_manager") and not device and not kiosk_company),
             "requested_employee_id": requested_employee_id,
             "kiosk_language": request.env.lang,
         })
+        if kiosk_company:
+            issued_at = int(time.time())
+            payload = f"{kiosk_company.id}:{issued_at}"
+            response.set_cookie(
+                "ff_face_kiosk_scope", f"{payload}:{self._scope_signature(payload)}",
+                max_age=8 * 60 * 60, httponly=True, secure=request.httprequest.is_secure,
+                samesite="Strict", path="/ff_face_attendance",
+            )
         if language_code:
             response.set_cookie(
                 "frontend_lang", language_code, max_age=60 * 60 * 24 * 365,

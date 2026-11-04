@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-inherit="hr_attendance.public_kiosk_app" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('o_hr_kiosk_mode_bottom')]" position="inside">
-            <a id="ff-face-open" href="/ff_face_attendance/enroll" class="btn btn-light btn-lg rounded-3">
+            <a id="ff-face-open" t-att-href="'/ff_face_attendance/enroll?kiosk_token=' + this.props.token" class="btn btn-light btn-lg rounded-3">
                 <i class="fa fa-camera me-2"/> Face Attendance
             </a>
         </xpath>
