@@ -10,7 +10,7 @@
                 <t t-call-assets="web.assets_frontend" t-css="false"/>
             </t>
             <t t-set="body">
-                <main class="ff-face-kiosk container py-5" aria-labelledby="ff-kiosk-title" t-att-data-local-demo="'true' if local_demo else 'false'" t-att-data-requested-employee="requested_employee_id or ''" t-att-lang="kiosk_language" t-att-dir="'rtl' if kiosk_language and kiosk_language.startswith('ar') else 'ltr'">
+                <main class="ff-face-kiosk container py-5" aria-labelledby="ff-kiosk-title" t-att-data-local-demo="'true' if local_demo else 'false'" t-att-data-enrollment-only="'true' if enrollment_only else 'false'" t-att-data-requested-employee="requested_employee_id or ''" t-att-lang="kiosk_language" t-att-dir="'rtl' if kiosk_language and kiosk_language.startswith('ar') else 'ltr'">
                     <section class="card shadow-sm mx-auto">
                         <div class="card-body p-4 p-md-5">
                             <nav class="ff-kiosk-language d-flex justify-content-end gap-2 mb-3" aria-label="Language">

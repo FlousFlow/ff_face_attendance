@@ -61,6 +61,15 @@ class FaceKioskController(http.Controller):
             return device
         return None
 
+    def _enrollment_company(self):
+        """Return the kiosk company, or the authenticated HR manager company."""
+        device = self._device()
+        if device:
+            return device.company_id
+        if request.env.user.has_group("hr.group_hr_manager"):
+            return request.env.company
+        return None
+
     @http.route("/ff_face_attendance/kiosk", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def kiosk_page(self, **kwargs):
         # Keep the old URL as a compatibility alias, but always use the native
@@ -97,6 +106,7 @@ class FaceKioskController(http.Controller):
                 requested_employee_id = candidate_id
         response = request.render("ff_face_attendance.public_face_kiosk", {
             "local_demo": self._is_local_demo(),
+            "enrollment_only": bool(request.env.user.has_group("hr.group_hr_manager") and not device),
             "requested_employee_id": requested_employee_id,
             "kiosk_language": request.env.lang,
         })
@@ -162,7 +172,8 @@ class FaceKioskController(http.Controller):
     @http.route("/ff_face_attendance/employee/status", type="http", auth="public", methods=["POST"], csrf=False, sitemap=False)
     def employee_status(self, **kwargs):
         device = self._device()
-        if not device:
+        company = self._enrollment_company()
+        if not company:
             return _json({"error": "unauthorized_device"}, 401)
         try:
             data = json.loads(request.httprequest.get_data(cache=False))
@@ -170,7 +181,7 @@ class FaceKioskController(http.Controller):
             if not isinstance(employee_id, int):
                 return _json({"error": "employee_number_required"}, 400)
             employee = request.env["hr.employee"].sudo().search([
-                ("id", "=", employee_id), ("company_id", "=", device.company_id.id), ("active", "=", True),
+                ("id", "=", employee_id), ("company_id", "=", company.id), ("active", "=", True),
             ], limit=1)
             if not employee:
                 return _json({"error": "employee_not_found"}, 404)
@@ -194,8 +205,8 @@ class FaceKioskController(http.Controller):
 
     @http.route("/ff_face_attendance/employee/search", type="http", auth="public", methods=["POST"], csrf=False, sitemap=False)
     def employee_search(self, **kwargs):
-        device = self._device()
-        if not device:
+        company = self._enrollment_company()
+        if not company:
             return _json({"error": "unauthorized_device"}, 401)
         try:
             data = json.loads(request.httprequest.get_data(cache=False))
@@ -203,7 +214,7 @@ class FaceKioskController(http.Controller):
             if not isinstance(query, str) or len(query.strip()) < 2:
                 return _json({"employees": []})
             employees = request.env["hr.employee"].sudo().search([
-                ("company_id", "=", device.company_id.id),
+                ("company_id", "=", company.id),
                 ("active", "=", True),
                 ("name", "ilike", query.strip()),
             ], order="name, id", limit=20)

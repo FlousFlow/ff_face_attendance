@@ -26,6 +26,8 @@ const initializeFaceKiosk = () => {
     openFaceButton?.addEventListener("click", () => setFacePanelVisible(true));
     closeFaceButton?.addEventListener("click", () => setFacePanelVisible(false));
     const localDemo = status.closest("main")?.dataset.localDemo === "true";
+    const enrollmentOnly = status.closest("main")?.dataset.enrollmentOnly === "true";
+    const hasEmployeeAccess = () => paired || enrollmentOnly;
     translationIsReady.then(() => {
         const sourceMessage = status.dataset.sourceMessage;
         if (sourceMessage) status.textContent = tr(sourceMessage);
@@ -112,7 +114,7 @@ const initializeFaceKiosk = () => {
                 hideEmployeeOptions();
                 clearEmployeeSelection();
                 selectedEmployeeId = employee.id;
-                byId("ff-employee-continue").disabled = !paired;
+                byId("ff-employee-continue").disabled = !hasEmployeeAccess();
                 employeeSearch.setAttribute("aria-activedescendant", "");
             });
             employeeOptions.appendChild(option);
@@ -125,7 +127,7 @@ const initializeFaceKiosk = () => {
         if (employeeSearchTimer) window.clearTimeout(employeeSearchTimer);
         if (employeeSearchController) employeeSearchController.abort();
         const query = employeeSearch.value.trim();
-        if (query.length < 2 || !paired) return hideEmployeeOptions();
+        if (query.length < 2 || !hasEmployeeAccess()) return hideEmployeeOptions();
         employeeSearchTimer = window.setTimeout(async () => {
             employeeSearchController = new AbortController();
             try {
@@ -152,7 +154,7 @@ const initializeFaceKiosk = () => {
         if (!event.target.closest(".ff-employee-lookup")) hideEmployeeOptions();
     });
     const setAttendanceReady = () => {
-        const ready = Boolean(paired && stream && currentEmployee?.enrolled);
+        const ready = Boolean(!enrollmentOnly && paired && stream && currentEmployee?.enrolled);
         byId("ff-check-in").disabled = !ready || Boolean(currentEmployee?.checked_in);
         byId("ff-check-out").disabled = !ready || !currentEmployee?.checked_in;
         if (currentEmployee?.checked_in) {
@@ -162,7 +164,7 @@ const initializeFaceKiosk = () => {
 
     const loadEmployeeStatus = async (employeeId) => {
         if (!employeeId) return say("Search for and select your name first.", "warning");
-        if (!paired) return say("Ask HR to connect this kiosk first.", "warning");
+        if (!hasEmployeeAccess()) return say("Ask HR to connect this kiosk first.", "warning");
         selectedEmployeeId = employeeId;
         try {
             const response = await fetch("/ff_face_attendance/employee/status", {
@@ -229,8 +231,8 @@ const initializeFaceKiosk = () => {
         fetch("/ff_face_attendance/device/status", { credentials: "same-origin" })
             .then((response) => response.json())
             .then((result) => {
-                if (!result.paired) return;
-                paired = true;
+                if (!result.paired && !enrollmentOnly) return;
+                paired = Boolean(result.paired);
                 byId("ff-device-credential").closest(".ff-kiosk-manual-setup").remove();
                 setAttendanceReady();
                 if (requestedEmployeeId) return loadEmployeeStatus(requestedEmployeeId);
@@ -398,7 +400,7 @@ const initializeFaceKiosk = () => {
         primeAudio();
         const video = byId("ff-kiosk-camera");
         const employeeId = currentEmployee?.employee_id;
-        if (!stream || !video.videoWidth || !paired) return say("Connect the kiosk and start the camera before registration.", "warning");
+        if (!stream || !video.videoWidth || !hasEmployeeAccess()) return say("Connect the kiosk and start the camera before registration.", "warning");
         if (!employeeId || !currentEmployee?.can_register) return say("Only an HR manager can register or replace face samples; a pending deletion must finish first.", "warning");
         const consentBox = byId(currentEmployee.enrolled ? "ff-reenroll-consent" : "ff-enrollment-consent");
         if (!consentBox.checked) return say("Ask the employee to review the notice and confirm before capturing any samples.", "warning");
