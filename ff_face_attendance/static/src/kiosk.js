@@ -27,6 +27,7 @@ const initializeFaceKiosk = () => {
     closeFaceButton?.addEventListener("click", () => setFacePanelVisible(false));
     const localDemo = status.closest("main")?.dataset.localDemo === "true";
     const enrollmentOnly = status.closest("main")?.dataset.enrollmentOnly === "true";
+    const adminMode = status.closest("main")?.dataset.adminMode === "true";
     const hasEmployeeAccess = () => !kioskLocked && (paired || enrollmentOnly);
     translationIsReady.then(() => {
         const sourceMessage = status.dataset.sourceMessage;

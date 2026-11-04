@@ -111,6 +111,24 @@ class FaceKioskController(http.Controller):
         except (TypeError, ValueError):
             return None
 
+    def _admin_enrollment_company(self):
+        """Return the company for a short-lived HR enrollment browser session."""
+        if not request.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
+            return None
+        raw = request.httprequest.cookies.get("ff_face_admin_enroll", "")
+        try:
+            company_id, issued_at, marker, signature = raw.split(":", 3)
+            issued_at = int(issued_at)
+            if time.time() - issued_at > 30 * 60 or marker != "admin":
+                return None
+            payload = f"{company_id}:{issued_at}:admin"
+            if not hmac.compare_digest(signature, self._scope_signature(payload)):
+                return None
+            company = request.env["res.company"].sudo().browse(int(company_id)).exists()
+            return company if company and company.id == request.env.company.id else None
+        except (TypeError, ValueError):
+            return None
+
     def _company_from_kiosk_token(self, token):
         if not token or len(token) > 128:
             return None
@@ -184,6 +202,16 @@ class FaceKioskController(http.Controller):
                 max_age=8 * 60 * 60, httponly=True, secure=request.httprequest.is_secure,
                 samesite="Strict", path="/ff_face_attendance",
             )
+        if admin_mode:
+            issued_at = int(time.time())
+            payload = f"{company.id}:{issued_at}:admin"
+            response.set_cookie(
+                "ff_face_admin_enroll", f"{payload}:{self._scope_signature(payload)}",
+                max_age=30 * 60, httponly=True, secure=request.httprequest.is_secure,
+                samesite="Strict", path="/ff_face_attendance",
+            )
+        else:
+            response.delete_cookie("ff_face_admin_enroll", path="/ff_face_attendance", secure=request.httprequest.is_secure, httponly=True, samesite="Strict")
         if language_code:
             response.set_cookie(
                 "frontend_lang", language_code, max_age=60 * 60 * 24 * 365,
@@ -303,17 +331,16 @@ class FaceKioskController(http.Controller):
             last_attendance = request.env["hr.attendance"].sudo().search(
                 [("employee_id", "=", employee.id)], order="check_in desc, id desc", limit=1
             )
+            admin_company = self._admin_enrollment_company()
+            admin_enrollment = bool(admin_company and admin_company.id == company.id)
             return _json({
                 "employee_id": employee.id,
                 "employee_name": employee.name,
                 "enrolled": employee.ff_face_enrollment_status == "enrolled" and bool(employee.ff_face_template_ref),
                 "enrollment_status": employee.ff_face_enrollment_status,
                 "checked_in": bool(last_attendance and not last_attendance.check_out),
-                "can_enroll": request.env.user.has_group("ff_face_attendance.group_ff_face_manager"),
-                "can_register": (
-                    request.env.user.has_group("ff_face_attendance.group_ff_face_manager")
-                    and employee.ff_face_enrollment_status != "revocation_pending"
-                ),
+                "can_enroll": admin_enrollment,
+                "can_register": admin_enrollment and employee.ff_face_enrollment_status != "revocation_pending",
             })
         except (ValueError, TypeError):
             return _json({"error": "invalid_request"}, 400)
@@ -380,7 +407,8 @@ class FaceKioskController(http.Controller):
     def pilot_enroll(self, **kwargs):
         if not _same_origin_request():
             return _json({"error": "same_origin_required"}, 403)
-        if not request.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
+        admin_company = self._admin_enrollment_company()
+        if not admin_company:
             return _json({"error": "hr_manager_required"}, 403)
         try:
             raw_body = request.httprequest.get_data(cache=False)
@@ -396,7 +424,7 @@ class FaceKioskController(http.Controller):
             if not consent_acknowledged or consent_version != "2026-11-02-v1":
                 return _json({"error": "employee_acknowledgment_required"}, 400)
             employee = request.env["hr.employee"].browse(employee_id).exists()
-            if not employee or employee.company_id != request.env.company or not employee.active:
+            if not employee or employee.company_id != admin_company or not employee.active:
                 return _json({"error": "employee_not_available"}, 404)
             if employee.ff_face_enrollment_status == "revocation_pending":
                 return _json({"error": "revocation_pending"}, 409)
