@@ -202,6 +202,12 @@ class FaceKioskController(http.Controller):
                 max_age=8 * 60 * 60, httponly=True, secure=request.httprequest.is_secure,
                 samesite="Strict", path="/ff_face_attendance",
             )
+            # A kiosk URL is a new access session. Do not let an old browser
+            # auth cookie silently bypass the PIN when the page is reopened.
+            response.delete_cookie(
+                "ff_face_kiosk_auth", path="/ff_face_attendance",
+                secure=request.httprequest.is_secure, httponly=True, samesite="Strict",
+            )
         if admin_mode:
             issued_at = int(time.time())
             payload = f"{company.id}:{issued_at}:admin"

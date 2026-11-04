@@ -452,6 +452,43 @@ const initializeFaceKiosk = () => {
         return frames;
     };
 
+    // Enrollment must cover the neutral pose and both head-turn directions.
+    // A single random side leaves the opposite profile under-represented and
+    // makes the later liveness challenge unnecessarily sensitive to direction.
+    const captureEnrollmentFrames = async (video) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        const frames = [];
+        const prompt = byId("ff-motion-prompt");
+        const capture = () => {
+            context.drawImage(video, 0, 0);
+            frames.push(canvas.toDataURL("image/jpeg", 0.82).split(",", 2)[1]);
+        };
+        try {
+            prompt.textContent = tr("Look straight at the camera");
+            prompt.classList.remove("d-none");
+            beep(660);
+            await new Promise((resolve) => setTimeout(resolve, 800));
+            capture();
+
+            for (const challenge of ["turn_left", "turn_right"]) {
+                const direction = challenge === "turn_left" ? tr("left") : tr("right");
+                prompt.textContent = tr("Turn your own %s and hold").replace("%s", direction);
+                beep(740);
+                await new Promise((resolve) => setTimeout(resolve, 1400));
+                for (let index = 0; index < 4; index += 1) {
+                    capture();
+                    await new Promise((resolve) => setTimeout(resolve, 300));
+                }
+            }
+            return frames;
+        } finally {
+            prompt.classList.add("d-none");
+        }
+    };
+
     const registerFace = async () => {
         primeAudio();
         const video = byId("ff-kiosk-camera");
@@ -460,13 +497,13 @@ const initializeFaceKiosk = () => {
         if (!employeeId || !currentEmployee?.can_register) return say("Only an HR manager can register or replace face samples; a pending deletion must finish first.", "warning");
         const consentBox = byId(currentEmployee.enrolled ? "ff-reenroll-consent" : "ff-enrollment-consent");
         if (!consentBox.checked) return say("Ask the employee to review the notice and confirm before capturing any samples.", "warning");
-        say("Keep one face centered. First look straight at the camera, then follow the head-turn prompt to replace the local pilot samples.", "info");
+        say("Keep one face centered. Look straight first, then turn left and right when prompted to replace the local pilot samples.", "info");
         beep(660);
         pauseLandmarkGuide();
         try {
             const response = await fetch(localDemo ? "/ff_face_attendance/pilot/enroll_public" : "/ff_face_attendance/pilot/enroll", {
                 method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin",
-                body: JSON.stringify({ employee_id: employeeId, samples: await captureFrames(video, crypto.getRandomValues(new Uint8Array(1))[0] & 1 ? "turn_left" : "turn_right", true), consent_acknowledged: true, consent_version: "2026-11-02-v1" }),
+                body: JSON.stringify({ employee_id: employeeId, samples: await captureEnrollmentFrames(video), consent_acknowledged: true, consent_version: "2026-11-02-v1" }),
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || "enrollment_failed");
