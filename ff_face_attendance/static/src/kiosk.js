@@ -75,7 +75,11 @@ const initializeFaceKiosk = () => {
     let landmarkGuideActive = false;
     let landmarkRequestInFlight = false;
     let landmarkTimer = null;
-    const requestedEmployeeId = Number(status.closest("main")?.dataset.requestedEmployee || 0);
+    const requestedEmployeeId = Number(
+        status.closest("main")?.dataset.requestedEmployee
+        || new URLSearchParams(window.location.search).get("employee_id")
+        || 0
+    );
     const employeeSearch = byId("ff-employee-search");
     const employeeOptions = byId("ff-employee-options");
     const clearEmployeeSelection = () => {
