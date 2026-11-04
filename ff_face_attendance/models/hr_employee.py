@@ -12,7 +12,7 @@ class HrEmployee(models.Model):
     _inherit = "hr.employee"
 
     def action_open_face_enrollment_kiosk(self):
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can open the face enrollment kiosk."))
         self.ensure_one()
         if not self.active:
@@ -44,14 +44,14 @@ class HrEmployee(models.Model):
         ("not_enrolled", "Not Enrolled"), ("enrolled", "Enrolled"),
         ("revocation_pending", "Revocation Pending"),
         ("revoked", "Revoked"), ("re_enrollment", "Re-enrollment Required"),
-    ], string="Face Enrollment Status", default="not_enrolled", copy=False, readonly=True, groups="hr.group_hr_manager")
-    ff_face_template_ref = fields.Char(string="Face Template Reference", copy=False, index=True, readonly=True, groups="hr.group_hr_manager")
-    ff_face_model_version = fields.Char(string="Face Model Version", copy=False, readonly=True, groups="hr.group_hr_manager")
-    ff_face_enrolled_at = fields.Datetime(string="Face Enrolled At", readonly=True, copy=False, groups="hr.group_hr_manager")
-    ff_face_enrollment_operator_id = fields.Many2one("res.users", string="Enrollment Operator", readonly=True, copy=False, groups="hr.group_hr_manager")
-    ff_face_sample_count = fields.Integer(string="Face Sample Count", readonly=True, copy=False, groups="hr.group_hr_manager")
-    ff_face_quality_status = fields.Selection([("pending", "Pending"), ("accepted", "Accepted"), ("rejected", "Rejected")], string="Face Quality Status", readonly=True, copy=False, groups="hr.group_hr_manager")
-    ff_face_consent_receipt_ids = fields.One2many("ff.face.consent.receipt", "employee_id", string="Face Consent History", groups="hr.group_hr_manager", readonly=True)
+    ], string="Face Enrollment Status", default="not_enrolled", copy=False, readonly=True, groups="ff_face_attendance.group_ff_face_manager")
+    ff_face_template_ref = fields.Char(string="Face Template Reference", copy=False, index=True, readonly=True, groups="ff_face_attendance.group_ff_face_manager")
+    ff_face_model_version = fields.Char(string="Face Model Version", copy=False, readonly=True, groups="ff_face_attendance.group_ff_face_manager")
+    ff_face_enrolled_at = fields.Datetime(string="Face Enrolled At", readonly=True, copy=False, groups="ff_face_attendance.group_ff_face_manager")
+    ff_face_enrollment_operator_id = fields.Many2one("res.users", string="Enrollment Operator", readonly=True, copy=False, groups="ff_face_attendance.group_ff_face_manager")
+    ff_face_sample_count = fields.Integer(string="Face Sample Count", readonly=True, copy=False, groups="ff_face_attendance.group_ff_face_manager")
+    ff_face_quality_status = fields.Selection([("pending", "Pending"), ("accepted", "Accepted"), ("rejected", "Rejected")], string="Face Quality Status", readonly=True, copy=False, groups="ff_face_attendance.group_ff_face_manager")
+    ff_face_consent_receipt_ids = fields.One2many("ff.face.consent.receipt", "employee_id", string="Face Consent History", groups="ff_face_attendance.group_ff_face_manager", readonly=True)
 
     @api.model
     def _cron_revoke_face_templates(self):
@@ -101,7 +101,7 @@ class HrEmployee(models.Model):
                 raise ValidationError(_("An active face template can only belong to one employee per company."))
 
     def action_revoke_face_enrollment(self):
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can revoke biometric enrollment."))
         for employee in self:
             employee.write({

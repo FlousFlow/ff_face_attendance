@@ -14,9 +14,9 @@ class FaceAttendanceException(models.Model):
     company_id = fields.Many2one("res.company", related="employee_id.company_id", store=True, index=True)
     device_id = fields.Many2one("ff.face.device", ondelete="restrict", check_company=True)
     reason = fields.Selection([("open_attendance", "Existing open attendance"), ("service_unavailable", "Verification service unavailable"), ("manual_review", "Manual HR review")], required=True, tracking=True)
-    details = fields.Text(groups="hr.group_hr_manager")
+    details = fields.Text(groups="ff_face_attendance.group_ff_face_manager")
     state = fields.Selection([("open", "Open"), ("review", "Under Review"), ("resolved", "Resolved"), ("rejected", "Rejected")], default="open", required=True, tracking=True)
-    resolution = fields.Text(groups="hr.group_hr_manager", tracking=True)
+    resolution = fields.Text(groups="ff_face_attendance.group_ff_face_manager", tracking=True)
 
     def action_start_review(self):
         self._check_hr()
@@ -33,5 +33,5 @@ class FaceAttendanceException(models.Model):
         self.write({"state": "rejected"})
 
     def _check_hr(self):
-        if not self.env.user.has_group("hr.group_hr_user"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_user"):
             raise AccessError(_("Only authorized HR staff can process attendance exceptions."))

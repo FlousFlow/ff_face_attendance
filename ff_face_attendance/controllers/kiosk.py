@@ -100,7 +100,7 @@ class FaceKioskController(http.Controller):
         scope_company = self._kiosk_scope_company()
         if scope_company:
             return scope_company
-        if request.env.user.has_group("hr.group_hr_manager"):
+        if request.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             return request.env.company
         return None
 
@@ -131,9 +131,9 @@ class FaceKioskController(http.Controller):
         device = self._device()
         company = kiosk_company or (device.company_id if device else request.env.company)
         requested_employee_id = False
-        if admin_mode and not request.env.user.has_group("hr.group_hr_manager"):
+        if admin_mode and not request.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             return request.not_found()
-        if request.env.user.has_group("hr.group_hr_manager") or admin_mode:
+        if request.env.user.has_group("ff_face_attendance.group_ff_face_manager") or admin_mode:
             try:
                 candidate_id = int(kwargs.get("employee_id") or 0)
             except (TypeError, ValueError):
@@ -144,7 +144,7 @@ class FaceKioskController(http.Controller):
                 requested_employee_id = candidate_id
         response = request.render("ff_face_attendance.public_face_kiosk", {
             "local_demo": self._is_local_demo(),
-            "enrollment_only": bool(admin_mode or (request.env.user.has_group("hr.group_hr_manager") and not device and not kiosk_company)),
+            "enrollment_only": bool(admin_mode or (request.env.user.has_group("ff_face_attendance.group_ff_face_manager") and not device and not kiosk_company)),
             "admin_mode": admin_mode,
             "enrollment_path": "/ff_face_attendance/admin/enroll" if admin_mode else "/ff_face_attendance/enroll",
             "requested_employee_id": requested_employee_id,
@@ -178,7 +178,7 @@ class FaceKioskController(http.Controller):
     @http.route("/ff_face_attendance/native_kiosk", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def native_attendance_kiosk(self, **kwargs):
         device = self._device()
-        if not device and not request.env.user.has_group("hr.group_hr_manager"):
+        if not device and not request.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             return _json({"error": "paired_kiosk_or_hr_login_required"}, 403)
         company = (device.company_id if device else request.env.company).sudo()
         target = company.attendance_kiosk_url if "attendance_kiosk_url" in company._fields else False
@@ -248,9 +248,9 @@ class FaceKioskController(http.Controller):
                 "enrolled": employee.ff_face_enrollment_status == "enrolled" and bool(employee.ff_face_template_ref),
                 "enrollment_status": employee.ff_face_enrollment_status,
                 "checked_in": bool(last_attendance and not last_attendance.check_out),
-                "can_enroll": request.env.user.has_group("hr.group_hr_manager"),
+                "can_enroll": request.env.user.has_group("ff_face_attendance.group_ff_face_manager"),
                 "can_register": (
-                    request.env.user.has_group("hr.group_hr_manager")
+                    request.env.user.has_group("ff_face_attendance.group_ff_face_manager")
                     and employee.ff_face_enrollment_status != "revocation_pending"
                 ),
             })
@@ -318,7 +318,7 @@ class FaceKioskController(http.Controller):
     def pilot_enroll(self, **kwargs):
         if not _same_origin_request():
             return _json({"error": "same_origin_required"}, 403)
-        if not request.env.user.has_group("hr.group_hr_manager"):
+        if not request.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             return _json({"error": "hr_manager_required"}, 403)
         try:
             raw_body = request.httprequest.get_data(cache=False)
@@ -399,7 +399,7 @@ class FaceKioskController(http.Controller):
         device = self._device()
         if not device:
             return _json({"error": "unauthorized_device"}, 401)
-        if not request.env.user.has_group("hr.group_hr_manager"):
+        if not request.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             return _json({"error": "hr_manager_required"}, 403)
         try:
             data = json.loads(request.httprequest.get_data(cache=False))

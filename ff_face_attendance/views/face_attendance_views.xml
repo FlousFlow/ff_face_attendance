@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
-                <page string="Face Attendance" groups="hr.group_hr_manager">
+                <page string="Face Attendance" groups="ff_face_attendance.group_ff_face_manager">
                     <group>
                         <button name="action_open_face_enrollment_kiosk" type="object" string="Open Enrollment Kiosk" class="btn-primary" icon="fa-camera"/>
                         <group>
@@ -71,9 +71,9 @@
     <record id="action_ff_face_device" model="ir.actions.act_window"><field name="name">Face Attendance Devices</field><field name="res_model">ff.face.device</field><field name="view_mode">list,form</field></record>
     <record id="action_ff_face_exception" model="ir.actions.act_window"><field name="name">Face Attendance Exceptions</field><field name="res_model">ff.face.exception</field><field name="view_mode">list,form</field></record>
     <record id="action_ff_face_attempt" model="ir.actions.act_window"><field name="name">Verification Audit</field><field name="res_model">ff.face.attempt</field><field name="view_mode">list</field><field name="search_view_id" ref="view_ff_face_attempt_search"/></record>
-    <menuitem id="menu_ff_face_root" name="Face Attendance" web_icon="ff_face_attendance,static/description/icon.png" groups="hr.group_hr_user" sequence="90"/>
-    <menuitem id="menu_ff_face_devices" name="Kiosk Devices" parent="menu_ff_face_root" action="action_ff_face_device" groups="hr.group_hr_manager" sequence="10"/>
-    <menuitem id="menu_ff_face_policies" name="Policies" parent="menu_ff_face_root" action="action_ff_face_policy" groups="hr.group_hr_manager" sequence="20"/>
-    <menuitem id="menu_ff_face_exceptions" name="HR Exceptions" parent="menu_ff_face_root" action="action_ff_face_exception" groups="hr.group_hr_user" sequence="30"/>
-    <menuitem id="menu_ff_face_attempts" name="Verification Audit" parent="menu_ff_face_root" action="action_ff_face_attempt" groups="hr.group_hr_manager" sequence="40"/>
+    <menuitem id="menu_ff_face_root" name="Face Attendance" web_icon="ff_face_attendance,static/description/icon.png" groups="ff_face_attendance.group_ff_face_user" sequence="90"/>
+    <menuitem id="menu_ff_face_devices" name="Kiosk Devices" parent="menu_ff_face_root" action="action_ff_face_device" groups="ff_face_attendance.group_ff_face_manager" sequence="10"/>
+    <menuitem id="menu_ff_face_policies" name="Policies" parent="menu_ff_face_root" action="action_ff_face_policy" groups="ff_face_attendance.group_ff_face_manager" sequence="20"/>
+    <menuitem id="menu_ff_face_exceptions" name="HR Exceptions" parent="menu_ff_face_root" action="action_ff_face_exception" groups="ff_face_attendance.group_ff_face_user" sequence="30"/>
+    <menuitem id="menu_ff_face_attempts" name="Verification Audit" parent="menu_ff_face_root" action="action_ff_face_attempt" groups="ff_face_attendance.group_ff_face_manager" sequence="40"/>
 </odoo>

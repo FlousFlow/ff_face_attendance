@@ -16,7 +16,7 @@ class FaceConsentReceipt(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can record an enrollment acknowledgment."))
         for vals in vals_list:
             vals["recorded_by"] = self.env.user.id

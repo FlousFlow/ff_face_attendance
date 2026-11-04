@@ -16,25 +16,25 @@ class FaceDevice(models.Model):
     location = fields.Char()
     active = fields.Boolean(default=True)
     revoked_at = fields.Datetime(readonly=True, copy=False)
-    credential_hash = fields.Char(groups="hr.group_hr_manager", readonly=True, copy=False)
+    credential_hash = fields.Char(groups="ff_face_attendance.group_ff_face_manager", readonly=True, copy=False)
     credential_hint = fields.Char(readonly=True, copy=False)
     policy_id = fields.Many2one("ff.face.policy", required=True, ondelete="restrict", check_company=True)
-    last_landmark_request_at = fields.Datetime(readonly=True, copy=False, groups="hr.group_hr_manager")
+    last_landmark_request_at = fields.Datetime(readonly=True, copy=False, groups="ff_face_attendance.group_ff_face_manager")
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            if not self.env.user.has_group("hr.group_hr_manager"):
+            if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
                 raise AccessError(_("Only an HR manager can register a kiosk device."))
         return super().create(vals_list)
 
     def write(self, vals):
-        if not self.env.su and not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.su and not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can configure kiosk devices."))
         return super().write(vals)
 
     def unlink(self):
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can remove kiosk devices."))
         return super().unlink()
 
@@ -44,7 +44,7 @@ class FaceDevice(models.Model):
 
     def action_rotate_credential(self):
         self.ensure_one()
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can rotate device credentials."))
         secret = secrets.token_urlsafe(32)
         self.write({"credential_hash": self._hash_credential(secret), "credential_hint": secret[-6:]})
@@ -55,7 +55,7 @@ class FaceDevice(models.Model):
         }
 
     def action_revoke(self):
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can revoke a kiosk device."))
         self.write({"active": False, "revoked_at": fields.Datetime.now()})
 
@@ -78,17 +78,17 @@ class FacePolicy(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can configure biometric policies."))
         return super().create(vals_list)
 
     def write(self, vals):
-        if not self.env.su and not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.su and not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can configure biometric policies."))
         return super().write(vals)
 
     def unlink(self):
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can delete biometric policies."))
         return super().unlink()
 

@@ -29,7 +29,7 @@ class FaceServiceSetupWizard(models.TransientModel):
 
     def action_connect(self):
         self.ensure_one()
-        if not self.env.user.has_group("hr.group_hr_manager"):
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             raise AccessError(_("Only an HR manager can connect the face service."))
         if self.service_connected:
             raise UserError(_("The face service is already connected and ready."))

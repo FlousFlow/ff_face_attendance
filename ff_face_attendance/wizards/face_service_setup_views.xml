@@ -36,5 +36,5 @@
     <menuitem id="menu_face_service_setup" name="Connect Face Service"
               parent="ff_face_attendance.menu_ff_face_root"
               action="action_face_service_setup_wizard"
-              groups="hr.group_hr_manager" sequence="50"/>
+              groups="ff_face_attendance.group_ff_face_manager" sequence="50"/>
 </odoo>

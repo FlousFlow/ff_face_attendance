@@ -1,8 +1,8 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_face_service_setup_wizard_manager,face.service.setup.wizard manager,model_face_service_setup_wizard,hr.group_hr_manager,1,1,1,1
-access_ff_face_device_hr,ff.face.device hr,model_ff_face_device,hr.group_hr_manager,1,1,1,0
-access_ff_face_policy_hr,ff.face.policy hr,model_ff_face_policy,hr.group_hr_manager,1,1,1,0
-access_ff_face_exception_hr,ff.face.exception hr,model_ff_face_exception,hr.group_hr_user,1,1,1,0
-access_ff_face_attempt_hr,ff.face.attempt hr,model_ff_face_attempt,hr.group_hr_manager,1,0,0,0
-access_ff_face_session_hr,ff.face.session hr,model_ff_face_session,hr.group_hr_user,1,0,0,0
-access_ff_face_consent_hr,ff.face.consent.receipt hr,model_ff_face_consent_receipt,hr.group_hr_manager,1,0,1,0
+access_face_service_setup_wizard_manager,face.service.setup.wizard manager,model_face_service_setup_wizard,ff_face_attendance.group_ff_face_manager,1,1,1,1
+access_ff_face_device_hr,ff.face.device hr,model_ff_face_device,ff_face_attendance.group_ff_face_manager,1,1,1,0
+access_ff_face_policy_hr,ff.face.policy hr,model_ff_face_policy,ff_face_attendance.group_ff_face_manager,1,1,1,0
+access_ff_face_exception_hr,ff.face.exception hr,model_ff_face_exception,ff_face_attendance.group_ff_face_user,1,1,1,0
+access_ff_face_attempt_hr,ff.face.attempt hr,model_ff_face_attempt,ff_face_attendance.group_ff_face_manager,1,0,0,0
+access_ff_face_session_hr,ff.face.session hr,model_ff_face_session,ff_face_attendance.group_ff_face_user,1,0,0,0
+access_ff_face_consent_hr,ff.face.consent.receipt hr,model_ff_face_consent_receipt,ff_face_attendance.group_ff_face_manager,1,0,1,0
