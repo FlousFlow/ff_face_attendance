@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import secrets
 
 from odoo import _, api, fields, models
@@ -18,8 +19,15 @@ class FaceDevice(models.Model):
     revoked_at = fields.Datetime(readonly=True, copy=False)
     credential_hash = fields.Char(groups="ff_face_attendance.group_ff_face_manager", readonly=True, copy=False)
     credential_hint = fields.Char(readonly=True, copy=False)
+    kiosk_pin_hash = fields.Char(groups="ff_face_attendance.group_ff_face_manager", readonly=True, copy=False)
+    kiosk_pin_set = fields.Boolean(compute="_compute_kiosk_pin_set", groups="ff_face_attendance.group_ff_face_manager")
     policy_id = fields.Many2one("ff.face.policy", required=True, ondelete="restrict", check_company=True)
     last_landmark_request_at = fields.Datetime(readonly=True, copy=False, groups="ff_face_attendance.group_ff_face_manager")
+
+    @api.depends("kiosk_pin_hash")
+    def _compute_kiosk_pin_set(self):
+        for device in self:
+            device.kiosk_pin_set = bool(device.kiosk_pin_hash)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -41,6 +49,34 @@ class FaceDevice(models.Model):
     @staticmethod
     def _hash_credential(raw):
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+    @staticmethod
+    def _hash_kiosk_pin(pin):
+        salt = secrets.token_hex(16)
+        digest = hashlib.pbkdf2_hmac("sha256", pin.encode("utf-8"), salt.encode("utf-8"), 200_000).hex()
+        return f"{salt}${digest}"
+
+    @staticmethod
+    def _check_kiosk_pin(stored, pin):
+        try:
+            salt, expected = stored.split("$", 1)
+            actual = hashlib.pbkdf2_hmac("sha256", pin.encode("utf-8"), salt.encode("utf-8"), 200_000).hex()
+            return hmac.compare_digest(actual, expected)
+        except (AttributeError, TypeError, ValueError):
+            return False
+
+    def action_set_kiosk_pin(self):
+        self.ensure_one()
+        if not self.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
+            raise AccessError(_("Only an HR manager can set the kiosk PIN."))
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Set Kiosk PIN"),
+            "res_model": "ff.face.device.pin.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {"default_device_id": self.id},
+        }
 
     def action_rotate_credential(self):
         self.ensure_one()

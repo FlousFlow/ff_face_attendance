@@ -61,11 +61,19 @@ class FaceKioskController(http.Controller):
             return device
         scope_company = self._kiosk_scope_company()
         if scope_company:
-            scoped_devices = request.env["ff.face.device"].sudo().search([
-                ("company_id", "=", scope_company.id), ("active", "=", True), ("revoked_at", "=", False),
-            ], limit=2)
-            return scoped_devices if len(scoped_devices) == 1 else None
+            scoped_devices = self._scoped_devices(scope_company)
+            if len(scoped_devices) != 1:
+                return None
+            device = scoped_devices[0]
+            if device.kiosk_pin_hash and self._kiosk_authenticated_company() != scope_company:
+                return None
+            return device
         return None
+
+    def _scoped_devices(self, company):
+        return request.env["ff.face.device"].sudo().search([
+            ("company_id", "=", company.id), ("active", "=", True), ("revoked_at", "=", False),
+        ], limit=2)
 
     @staticmethod
     def _scope_signature(payload):
@@ -87,6 +95,20 @@ class FaceKioskController(http.Controller):
         except (TypeError, ValueError):
             return None
 
+    def _kiosk_authenticated_company(self):
+        raw = request.httprequest.cookies.get("ff_face_kiosk_auth", "")
+        try:
+            company_id, issued_at, signature = raw.split(":", 2)
+            issued_at = int(issued_at)
+            if time.time() - issued_at > 8 * 60 * 60:
+                return None
+            payload = f"{company_id}:{issued_at}:authenticated"
+            if not hmac.compare_digest(signature, self._scope_signature(payload)):
+                return None
+            return request.env["res.company"].sudo().browse(int(company_id)).exists()
+        except (TypeError, ValueError):
+            return None
+
     def _company_from_kiosk_token(self, token):
         if not token or len(token) > 128:
             return None
@@ -99,7 +121,9 @@ class FaceKioskController(http.Controller):
             return device.company_id
         scope_company = self._kiosk_scope_company()
         if scope_company:
-            return scope_company
+            scoped_devices = self._scoped_devices(scope_company)
+            if len(scoped_devices) == 1 and not scoped_devices[0].kiosk_pin_hash:
+                return scope_company
         if request.env.user.has_group("ff_face_attendance.group_ff_face_manager"):
             return request.env.company
         return None
@@ -173,7 +197,42 @@ class FaceKioskController(http.Controller):
 
     @http.route("/ff_face_attendance/device/status", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def kiosk_device_status(self, **kwargs):
-        return _json({"paired": bool(self._device())})
+        device = self._device()
+        if device:
+            return _json({"paired": True, "pin_required": False})
+        scope_company = self._kiosk_scope_company()
+        if scope_company:
+            scoped_devices = self._scoped_devices(scope_company)
+            if len(scoped_devices) == 1 and scoped_devices[0].kiosk_pin_hash:
+                return _json({"paired": False, "pin_required": True})
+        return _json({"paired": False, "pin_required": False})
+
+    @http.route("/ff_face_attendance/device/pin/verify", type="http", auth="public", methods=["POST"], csrf=False, sitemap=False)
+    def verify_kiosk_pin(self, **kwargs):
+        scope_company = self._kiosk_scope_company()
+        if not scope_company:
+            return _json({"error": "kiosk_scope_required"}, 401)
+        scoped_devices = self._scoped_devices(scope_company)
+        if len(scoped_devices) != 1 or not scoped_devices[0].kiosk_pin_hash:
+            return _json({"error": "kiosk_pin_not_configured"}, 409)
+        try:
+            data = json.loads(request.httprequest.get_data(cache=False))
+            pin = data.get("pin")
+        except (TypeError, ValueError):
+            pin = None
+        if not isinstance(pin, str) or not re.fullmatch(r"[0-9]{4,12}", pin):
+            return _json({"error": "invalid_kiosk_pin"}, 401)
+        if not scoped_devices[0]._check_kiosk_pin(scoped_devices[0].kiosk_pin_hash, pin):
+            return _json({"error": "invalid_kiosk_pin"}, 401)
+        issued_at = int(time.time())
+        payload = f"{scope_company.id}:{issued_at}:authenticated"
+        response = _json({"result": "kiosk_unlocked"})
+        response.set_cookie(
+            "ff_face_kiosk_auth", f"{payload}:{self._scope_signature(payload)}",
+            max_age=8 * 60 * 60, httponly=True, secure=request.httprequest.is_secure,
+            samesite="Strict", path="/ff_face_attendance",
+        )
+        return response
 
     @http.route("/ff_face_attendance/native_kiosk", type="http", auth="public", methods=["GET"], csrf=False, sitemap=False)
     def native_attendance_kiosk(self, **kwargs):
@@ -312,6 +371,7 @@ class FaceKioskController(http.Controller):
     def logout_device(self, **kwargs):
         response = _json({"result": "device_logged_out"})
         response.delete_cookie("ff_face_kiosk", path="/ff_face_attendance", secure=True, httponly=True, samesite="Strict")
+        response.delete_cookie("ff_face_kiosk_auth", path="/ff_face_attendance", secure=request.httprequest.is_secure, httponly=True, samesite="Strict")
         return response
 
     @http.route("/ff_face_attendance/pilot/enroll", type="http", auth="user", methods=["POST"], csrf=False, sitemap=False)

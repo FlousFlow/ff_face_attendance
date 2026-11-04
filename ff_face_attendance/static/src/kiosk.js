@@ -27,7 +27,7 @@ const initializeFaceKiosk = () => {
     closeFaceButton?.addEventListener("click", () => setFacePanelVisible(false));
     const localDemo = status.closest("main")?.dataset.localDemo === "true";
     const enrollmentOnly = status.closest("main")?.dataset.enrollmentOnly === "true";
-    const hasEmployeeAccess = () => paired || enrollmentOnly;
+    const hasEmployeeAccess = () => !kioskLocked && (paired || enrollmentOnly);
     translationIsReady.then(() => {
         const sourceMessage = status.dataset.sourceMessage;
         if (sourceMessage) status.textContent = tr(sourceMessage);
@@ -75,6 +75,47 @@ const initializeFaceKiosk = () => {
     let landmarkGuideActive = false;
     let landmarkRequestInFlight = false;
     let landmarkTimer = null;
+    let kioskLocked = false;
+    const setKioskLocked = (locked, message = "") => {
+        kioskLocked = locked;
+        byId("ff-kiosk-lock")?.classList.toggle("d-none", !locked);
+        if (message) {
+            const pinStatus = byId("ff-kiosk-pin-status");
+            if (pinStatus) pinStatus.textContent = message;
+        }
+        for (const id of ["ff-kiosk-pin", "ff-kiosk-unlock"]) byId(id)?.toggleAttribute("disabled", !locked);
+        for (const id of ["ff-camera-start", "ff-employee-search", "ff-employee-continue"]) byId(id)?.toggleAttribute("disabled", locked);
+        if (locked) {
+            byId("ff-check-in")?.toggleAttribute("disabled", true);
+            byId("ff-check-out")?.toggleAttribute("disabled", true);
+        }
+    };
+    setKioskLocked(false);
+    byId("ff-kiosk-unlock")?.addEventListener("click", async () => {
+        const pinInput = byId("ff-kiosk-pin");
+        const pinStatus = byId("ff-kiosk-pin-status");
+        const pin = pinInput?.value.trim() || "";
+        if (!/^[0-9]{4,12}$/.test(pin)) {
+            if (pinStatus) pinStatus.textContent = tr("Enter the 4–12 digit kiosk PIN.");
+            return;
+        }
+        try {
+            const response = await fetch("/ff_face_attendance/device/pin/verify", {
+                method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin",
+                body: JSON.stringify({ pin }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "invalid_kiosk_pin");
+            paired = true;
+            pinInput.value = "";
+            setKioskLocked(false);
+            setAttendanceReady();
+            say("Kiosk unlocked. Search and select the employee name to continue.", "success");
+            if (requestedEmployeeId) await loadEmployeeStatus(requestedEmployeeId);
+        } catch (error) {
+            if (pinStatus) pinStatus.textContent = tr("Invalid kiosk PIN. Try again or ask HR to reset it.");
+        }
+    });
     const requestedEmployeeId = Number(
         status.closest("main")?.dataset.requestedEmployee
         || new URLSearchParams(window.location.search).get("employee_id")
@@ -216,6 +257,7 @@ const initializeFaceKiosk = () => {
             if (!response.ok) throw new Error(result.error || "pairing_failed");
             if (!local) byId("ff-device-credential").closest(".ff-kiosk-manual-setup").remove();
             paired = true;
+            setKioskLocked(false);
             setAttendanceReady();
             if (requestedEmployeeId) {
                 await loadEmployeeStatus(requestedEmployeeId);
@@ -235,9 +277,18 @@ const initializeFaceKiosk = () => {
         fetch("/ff_face_attendance/device/status", { credentials: "same-origin" })
             .then((response) => response.json())
             .then((result) => {
-                if (!result.paired && !enrollmentOnly) return;
+                if (enrollmentOnly) {
+                    setKioskLocked(false);
+                } else if (result.pin_required) {
+                    setKioskLocked(true, "Enter the PIN configured by HR to unlock this kiosk.");
+                    return;
+                } else if (!result.paired) {
+                    return;
+                } else {
+                    setKioskLocked(false);
+                }
                 paired = Boolean(result.paired);
-                byId("ff-device-credential").closest(".ff-kiosk-manual-setup").remove();
+                byId("ff-device-credential")?.closest(".ff-kiosk-manual-setup")?.remove();
                 setAttendanceReady();
                 if (requestedEmployeeId) return loadEmployeeStatus(requestedEmployeeId);
                 say("Kiosk is already connected. Search and select your employee name to continue.", "success");

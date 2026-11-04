@@ -15,6 +15,7 @@
         "views/kiosk_templates.xml",
         "views/face_attendance_views.xml",
         "wizards/face_service_setup_views.xml",
+        "wizards/face_device_pin_views.xml",
         "data/face_attendance_cron.xml",
     ],
     "assets": {

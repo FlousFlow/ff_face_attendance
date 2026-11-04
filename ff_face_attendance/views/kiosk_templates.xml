@@ -21,6 +21,14 @@
                             <p class="text-muted"><t t-if="admin_mode">Select an employee, obtain consent, and record the supervised face samples from this HR-only page.</t><t t-else="">Stand in front of the camera, center your face in the guide, then follow the movement prompt.</t></p>
                             <div class="alert alert-warning" role="status">Free supervised pilot. Keep Badge/PIN available as the normal fallback.</div>
                             <div class="alert alert-info"><t t-if="admin_mode">This page is restricted to HR managers. Choose the employee below, then click Register face (HR).</t><t t-else="">The kiosk connection is managed by HR. The one-time setup credential is consumed during provisioning and is never shown on this employee registration page. <a href="/ff_face_attendance/native_kiosk">Open the standard Odoo Badge/PIN attendance kiosk</a>.</t></div>
+                            <div id="ff-kiosk-lock" class="alert alert-warning d-none" role="alert">
+                                <strong>Kiosk locked.</strong> Enter the PIN configured by HR to continue.
+                                <div class="input-group mt-2">
+                                    <input id="ff-kiosk-pin" class="form-control" type="password" inputmode="numeric" autocomplete="off" maxlength="12"/>
+                                    <button id="ff-kiosk-unlock" class="btn btn-primary" type="button">Unlock kiosk</button>
+                                </div>
+                                <div id="ff-kiosk-pin-status" class="mt-2" role="status"></div>
+                            </div>
                             <button id="ff-camera-start" class="btn btn-outline-secondary ms-2" type="button">Check camera</button>
                             <div id="ff-employee-lookup" class="mt-3 ff-employee-lookup position-relative">
                                 <label class="form-label" for="ff-employee-search">Employee name</label>
