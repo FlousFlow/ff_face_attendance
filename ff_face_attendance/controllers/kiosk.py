@@ -51,14 +51,13 @@ class FaceKioskController(http.Controller):
     def _device(self):
         authorization = request.httprequest.headers.get("Authorization", "")
         raw = authorization[7:].strip() if authorization.startswith("Bearer ") else request.httprequest.cookies.get("ff_face_kiosk", "")
-        if not raw or len(raw) > 256:
-            return None
-        digest = hashlib.sha256(raw.encode()).hexdigest()
-        device = request.env["ff.face.device"].sudo().search([
-            ("credential_hash", "=", digest), ("active", "=", True), ("revoked_at", "=", False),
-        ], limit=1)
-        if device and hmac.compare_digest(device.credential_hash or "", digest):
-            return device
+        if raw and len(raw) <= 256:
+            digest = hashlib.sha256(raw.encode()).hexdigest()
+            device = request.env["ff.face.device"].sudo().search([
+                ("credential_hash", "=", digest), ("active", "=", True), ("revoked_at", "=", False),
+            ], limit=1)
+            if device and hmac.compare_digest(device.credential_hash or "", digest):
+                return device
         scope_company = self._kiosk_scope_company()
         if scope_company:
             scoped_devices = self._scoped_devices(scope_company)
@@ -204,11 +203,10 @@ class FaceKioskController(http.Controller):
         if device:
             return _json({"paired": True, "pin_required": False})
         scope_company = self._kiosk_scope_company()
-        authenticated_company = self._kiosk_authenticated_company()
         if scope_company:
             scoped_devices = self._scoped_devices(scope_company)
             if len(scoped_devices) == 1 and scoped_devices[0].kiosk_pin_hash:
-                return _json({"paired": False, "pin_required": True, "_debug_scope": bool(scope_company), "_debug_auth": bool(authenticated_company), "_debug_scope_id": scope_company.id, "_debug_auth_id": authenticated_company.id})
+                return _json({"paired": False, "pin_required": True})
         return _json({"paired": False, "pin_required": False})
 
     @http.route("/ff_face_attendance/device/pin/verify", type="http", auth="public", methods=["POST"], csrf=False, sitemap=False)
