@@ -22,6 +22,7 @@
         "hr_attendance.assets_public_attendance": [
             "ff_face_attendance/static/src/public_kiosk_face.xml",
             "ff_face_attendance/static/src/kiosk.js",
+            "ff_face_attendance/static/src/kiosk.css",
             "ff_face_attendance/static/src/kiosk.scss",
         ],
     },
