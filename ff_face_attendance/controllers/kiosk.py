@@ -84,9 +84,11 @@ class FaceKioskController(http.Controller):
     def _kiosk_scope_company(self):
         raw = request.httprequest.cookies.get("ff_face_kiosk_scope", "")
         try:
-            company_id, issued_at, signature = raw.split(":", 2)
+            company_id, issued_at, marker, signature = raw.split(":", 3)
             issued_at = int(issued_at)
             if time.time() - issued_at > 8 * 60 * 60:
+                return None
+            if marker != "authenticated":
                 return None
             payload = f"{company_id}:{issued_at}"
             if not hmac.compare_digest(signature, self._scope_signature(payload)):
