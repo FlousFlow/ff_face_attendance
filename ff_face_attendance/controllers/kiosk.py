@@ -65,7 +65,8 @@ class FaceKioskController(http.Controller):
             if len(scoped_devices) != 1:
                 return None
             device = scoped_devices[0]
-            if device.kiosk_pin_hash and self._kiosk_authenticated_company() != scope_company:
+            authenticated_company = self._kiosk_authenticated_company()
+            if device.kiosk_pin_hash and (not authenticated_company or authenticated_company.id != scope_company.id):
                 return None
             return device
         return None
